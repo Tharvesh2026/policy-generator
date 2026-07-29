@@ -4,20 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bucket Policy Generator</title>
-
-<meta name="description" content="Bucket Policy Generator — a free, browser-based tool to build valid AWS S3 bucket policy JSON with permission profiles, principal-based access control, and multi-statement support.">
+<meta name="description" content="Bucket Policy Generator — a free, browser-based tool to build S3-style bucket access policy JSON with permission profiles, WhatsApp-style access control, templates, and a custom statement builder.">
 <meta name="keywords" content="bucket policy generator, S3 policy json, IAM policy builder, access control generator, bucket permissions tool">
 <meta name="author" content="Tharvesh Muhaideen">
 <link rel="canonical" href="https://tharvesh2026.github.io/policy-generator/">
 
+<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Bucket Policy Generator">
-<meta property="og:description" content="Build valid AWS S3 bucket policy JSON visually — permission profiles, principal-based access, and multi-statement editing.">
+<meta property="og:description" content="Build S3-style bucket access policy JSON visually — permission profiles, access rules, templates, and multi-statement editing.">
 <meta property="og:url" content="https://tharvesh2026.github.io/policy-generator/">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/og-image.png">
 
+<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Bucket Policy Generator">
-<meta name="twitter:description" content="Build valid AWS S3 bucket policy JSON visually — permission profiles, principal-based access, and multi-statement editing.">
+<meta name="twitter:description" content="Build S3-style bucket access policy JSON visually — permission profiles, access rules, templates, and multi-statement editing.">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/og-image.png">
+
+<link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/Tharvesh2026/tharvesh2026.github.io@refs/heads/main/src/laptop-dev-icon/971.jpg">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
@@ -26,50 +31,107 @@
 
 <style>
   :root{
-    --bg: #F2F4FA; --panel: #FFFFFF; --panel-border: #E2E6F0;
-    --ink: #131B34; --ink-soft: #5D6B89; --ink-faint: #8B96AC;
-    --accent: #4F46E5; --accent-soft: #EEEDFD; --accent-dark: #4338CA;
-    --teal: #0D9488; --teal-soft: #E6F7F5;
-    --danger: #DC2626; --danger-soft: #FEF2F2;
-    --success: #059669; --success-soft: #ECFDF5;
-    --warn: #D97706; --warn-soft: #FFFBEB;
-    --editor-bg: #10152B; --editor-line: #232A47;
-    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --bg: #F2F4FA;
+    --panel: #FFFFFF;
+    --panel-border: #E2E6F0;
+    --ink: #131B34;
+    --ink-soft: #5D6B89;
+    --ink-faint: #8B96AC;
+    --accent: #4F46E5;
+    --accent-soft: #EEEDFD;
+    --accent-dark: #4338CA;
+    --teal: #0D9488;
+    --teal-soft: #E6F7F5;
+    --danger: #DC2626;
+    --danger-soft: #FEF2F2;
+    --success: #059669;
+    --success-soft: #ECFDF5;
+    --warn: #D97706;
+    --warn-soft: #FFFBEB;
+    --editor-bg: #10152B;
+    --editor-line: #232A47;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
     --shadow: 0 1px 2px rgba(19,27,52,0.04), 0 10px 28px -14px rgba(19,27,52,0.16);
     --tap-min: 44px;
   }
+
   *{box-sizing:border-box;}
+
   body{
     background: var(--bg);
     background-image: radial-gradient(circle at 1px 1px, rgba(19,27,52,0.05) 1px, transparent 0);
     background-size: 24px 24px;
-    color: var(--ink); font-family: 'Inter', system-ui, sans-serif;
-    min-height: 100vh; padding-bottom: 60px;
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 60px;
   }
+
   .mono{ font-family:'JetBrains Mono', monospace; }
   .display{ font-family:'Plus Jakarta Sans', sans-serif; }
+
   p, .measure{ max-width: 62ch; }
 
-  .topbar{ position: sticky; top: 0; z-index: 1030; background: rgba(255,255,255,0.94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--panel-border); }
-  .brand-mark{ width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, var(--accent), #7C6CF6); display:flex; align-items:center; justify-content:center; color:#fff; font-size: 1.25rem; box-shadow: 0 6px 16px -4px rgba(79,70,229,0.5); }
+  /* ===== Top Bar ===== */
+  .topbar{
+    position: sticky; top: 0; z-index: 1030;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .brand-mark{
+    width: 40px; height: 40px; border-radius: 11px;
+    background: linear-gradient(135deg, var(--accent), #7C6CF6);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size: 1.25rem;
+    box-shadow: 0 6px 16px -4px rgba(79,70,229,0.5);
+  }
   .brand-title{ font-family:'Plus Jakarta Sans',sans-serif; font-weight: 800; font-size: 1.08rem; letter-spacing: -0.01em; }
   .brand-sub{ font-size: 0.7rem; color: var(--ink-soft); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-  .mode-badge{ font-size:0.68rem; font-weight:700; padding:0.3rem 0.6rem; border-radius:999px; background:var(--accent-soft); color:var(--accent-dark); display:inline-flex; align-items:center; gap:0.3rem; }
 
-  .toolbar-btn{ border-radius: 10px; font-weight: 650; font-size: 0.85rem; padding: 0 1rem; min-height: var(--tap-min); display:inline-flex; align-items:center; gap:0.4rem; border: 1px solid var(--panel-border); background: #fff; color: var(--ink); transition: all .15s ease; white-space: nowrap; }
+  .toolbar-btn{
+    border-radius: 10px; font-weight: 650; font-size: 0.85rem;
+    padding: 0 1rem; min-height: var(--tap-min);
+    display:inline-flex; align-items:center; gap:0.4rem;
+    border: 1px solid var(--panel-border);
+    background: #fff; color: var(--ink);
+    transition: all .15s ease; white-space: nowrap;
+  }
   .toolbar-btn:hover{ border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
   .toolbar-btn.primary{ background: var(--accent); border-color: var(--accent); color: #fff; }
   .toolbar-btn.primary:hover{ background: var(--accent-dark); color:#fff; }
   .toolbar-btn.danger-ghost:hover{ border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
-  .toolbar-btn:focus-visible{ outline: 3px solid var(--accent-soft); outline-offset: 2px; }
   .toolbar-scroll{ gap: 0.5rem; }
 
-  .section-card{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1.5rem; }
-  .section-head{ display:flex; align-items:center; justify-content:space-between; gap: 1rem; padding: 1.25rem 1.5rem; cursor: pointer; user-select: none; width:100%; background:none; border:none; text-align:left; }
+  /* ===== Cards / Sections ===== */
+  .section-card{
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .section-head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+  }
   .section-head:hover{ background: #FAFBFE; }
-  .section-head:focus-visible{ outline: 3px solid var(--accent-soft); outline-offset: -3px; }
-  .section-icon{ width: 38px; height: 38px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-dark); display:flex; align-items:center; justify-content:center; font-size: 1.1rem; flex-shrink:0; }
-  .section-eyebrow{ font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; display:block; }
+  .section-icon{
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--accent-soft); color: var(--accent-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 1.1rem; flex-shrink:0;
+  }
+  .section-eyebrow{
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 2px; display:block;
+  }
   .section-title{ font-family:'Plus Jakarta Sans',sans-serif; font-weight: 750; font-size: 1.05rem; color: var(--ink); margin:0; }
   .section-desc{ font-size: 0.82rem; color: var(--ink-soft); margin: 2px 0 0; max-width: 52ch; }
   .section-chevron{ transition: transform .2s ease; color: var(--ink-faint); font-size: 1.3rem; }
@@ -78,103 +140,240 @@
 
   .form-label{ font-weight: 650; font-size: 0.8rem; color: var(--ink); margin-bottom: 0.3rem; }
   .field-group{ margin-bottom: 1.1rem; }
-  .form-control, .form-select{ border-radius: 9px; border: 1px solid var(--panel-border); font-size: 0.9rem; padding: 0.6rem 0.85rem; min-height: var(--tap-min); }
+  .form-control, .form-select{
+    border-radius: 9px; border: 1px solid var(--panel-border);
+    font-size: 0.9rem; padding: 0.6rem 0.85rem; min-height: var(--tap-min);
+  }
   .form-control:focus, .form-select:focus{ border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .form-text-hint{ font-size: 0.76rem; color: var(--ink-faint); margin-top: 0.3rem; }
-  .arn-preview{ font-size: 0.74rem; color: var(--teal); margin-top: 0.3rem; font-family:'JetBrains Mono',monospace; word-break: break-all; }
+  .arn-preview{ font-size: 0.74rem; color: var(--teal); margin-top: 0.35rem; font-family:'JetBrains Mono',monospace; word-break: break-all; }
 
-  .statement-strip{ display:flex; align-items:center; gap: 0.5rem; flex-wrap: wrap; padding: 1rem 1.5rem; border-bottom: 1px solid var(--panel-border); background: #FAFBFE; }
-  .statement-chip{ display:inline-flex; align-items:center; gap: 0.5rem; padding: 0.5rem 0.5rem 0.5rem 0.9rem; min-height: var(--tap-min); border-radius: 999px; border: 1.5px solid var(--panel-border); background: #fff; font-weight: 650; font-size: 0.85rem; color: var(--ink-soft); cursor: pointer; transition: all .15s ease; }
+  /* ===== Templates ===== */
+  .template-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.9rem; }
+  .template-card{
+    border: 1.5px solid var(--panel-border); border-radius: var(--radius-md);
+    padding: 1.1rem; cursor:pointer; transition: all .15s ease; background:#fff; text-align:left;
+  }
+  .template-card:hover{ border-color: var(--accent); background: var(--accent-soft); transform: translateY(-1px); }
+  .template-icon{
+    width: 36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    background: var(--teal-soft); color: var(--teal); font-size: 1.1rem; margin-bottom: 0.6rem;
+  }
+  .template-name{ font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; }
+  .template-desc{ font-size: 0.78rem; color: var(--ink-soft); line-height:1.4; }
+  .template-use{ font-size: 0.7rem; font-weight:700; color: var(--accent-dark); margin-top: 0.6rem; display:flex; align-items:center; gap:0.25rem; }
+
+  /* ===== Statement tabs ===== */
+  .statement-strip{
+    display:flex; align-items:center; gap: 0.5rem; flex-wrap: wrap;
+    padding: 1rem 1.5rem; border-bottom: 1px solid var(--panel-border);
+    background: #FAFBFE;
+  }
+  .statement-chip{
+    display:inline-flex; align-items:center; gap: 0.5rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.9rem; min-height: var(--tap-min);
+    border-radius: 999px; border: 1.5px solid var(--panel-border);
+    background: #fff; font-weight: 650; font-size: 0.85rem; color: var(--ink-soft);
+    cursor: pointer; transition: all .15s ease;
+  }
   .statement-chip:hover{ border-color: #C7CEE3; }
   .statement-chip.active{ border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
   .statement-chip.deny{ border-color: var(--danger); }
   .statement-chip.deny.active{ background: var(--danger-soft); color: var(--danger); }
-  .statement-chip .chip-close{ width: 22px; height: 22px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: inherit; font-size: 0.75rem; display:flex; align-items:center; justify-content:center; }
+  .statement-chip .chip-close{
+    width: 22px; height: 22px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,0.06); color: inherit; font-size: 0.75rem;
+    display:flex; align-items:center; justify-content:center;
+  }
   .statement-chip .chip-close:hover{ background: var(--danger-soft); color: var(--danger); }
-  .btn-add-statement{ display:inline-flex; align-items:center; gap: 0.4rem; min-height: var(--tap-min); padding: 0 1rem; border-radius: 999px; border: 1.5px dashed #B9C1DE; background: #fff; color: var(--accent-dark); font-weight: 700; font-size: 0.85rem; }
+  .btn-add-statement{
+    display:inline-flex; align-items:center; gap: 0.4rem;
+    min-height: var(--tap-min); padding: 0 1rem;
+    border-radius: 999px; border: 1.5px dashed #B9C1DE;
+    background: #fff; color: var(--accent-dark); font-weight: 700; font-size: 0.85rem;
+  }
   .btn-add-statement:hover{ background: var(--accent-soft); border-color: var(--accent); }
 
+  /* ===== Mode toggle (Guided / Custom) ===== */
+  .mode-toggle{ display:flex; gap:0.5rem; padding: 1rem 1.5rem 0; }
+  .mode-toggle-btn{
+    flex:1; min-height: var(--tap-min); border-radius: 10px; border:1.5px solid var(--panel-border);
+    background:#fff; font-weight:700; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:0.4rem;
+  }
+  .mode-toggle-btn.active{ border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+
+  /* ===== Permission Profile Cards ===== */
+  .profile-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.9rem; }
+  .profile-card{
+    position: relative; border: 1.5px solid var(--panel-border); border-radius: var(--radius-md);
+    padding: 1.1rem 1.1rem 1.1rem 3.2rem; cursor: pointer; transition: all .15s ease; background: #fff;
+    min-height: calc(var(--tap-min) + 30px);
+  }
+  .profile-card:hover{ border-color: #C2CAE6; background: #FAFBFF; }
+  .profile-card.active{ border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px rgba(79,70,229,0.14); }
+  .profile-card input{
+    position: absolute; left: 1rem; top: 1.15rem;
+    width: 18px; height: 18px; accent-color: var(--accent); cursor:pointer;
+  }
+  .profile-icon{
+    width: 34px; height: 34px; border-radius: 9px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--accent-soft); color: var(--accent-dark);
+    font-size: 1.05rem; margin-bottom: 0.55rem;
+  }
+  .profile-card.active .profile-icon{ background: var(--accent); color: #fff; }
+  .profile-name{ font-weight: 700; font-size: 0.92rem; margin-bottom: 2px; }
+  .profile-desc{ font-size: 0.78rem; color: var(--ink-soft); line-height:1.4; }
+
+  /* ===== Advanced Permissions / checkboxes ===== */
+  .adv-check{
+    display:flex; align-items:center; gap: 0.6rem; min-height: var(--tap-min);
+    border: 1px solid var(--panel-border); border-radius: var(--radius-sm);
+    padding: 0 0.9rem; background: #fff; transition: all .15s ease;
+  }
+  .adv-check:hover{ border-color: #C2CAE6; }
+  .adv-check input{ accent-color: var(--accent); width:17px; height:17px; cursor:pointer; }
+  .adv-check label{ font-size: 0.8rem; cursor:pointer; margin:0; }
+
+  /* ===== Access Control (WhatsApp style) ===== */
+  .access-option{
+    display:flex; align-items:flex-start; gap: 0.85rem;
+    border: 1.5px solid var(--panel-border); border-radius: var(--radius-md);
+    padding: 0.9rem 1.05rem; cursor: pointer; transition: all .15s ease;
+    margin-bottom: 0.65rem; background:#fff; min-height: var(--tap-min);
+  }
+  .access-option:hover{ border-color:#C2CAE6; background:#FAFBFF; }
+  .access-option.active{ border-color: var(--accent); background: var(--accent-soft); }
+  .access-option input{ accent-color: var(--accent); margin-top: 4px; cursor:pointer; }
+  .access-icon{
+    width: 34px; height:34px; border-radius:9px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--teal-soft); color: var(--teal); font-size: 1rem;
+  }
+  .access-option.active .access-icon{ background: var(--accent); color:#fff; }
+  .access-option-title{ font-weight: 700; font-size: 0.9rem; }
+  .access-option-desc{ font-size: 0.78rem; color: var(--ink-soft); }
+
+  .access-editor{
+    border: 1px dashed #C7D0EA; border-radius: var(--radius-md);
+    padding: 1.1rem; background: #FBFCFE; margin-top: 0.85rem;
+  }
+  .chip-list{ display:flex; flex-wrap:wrap; gap: 0.5rem; margin-bottom: 0.85rem; }
+  .chip{
+    display:inline-flex; align-items:center; gap:0.45rem;
+    background:#fff; border:1px solid var(--panel-border);
+    padding: 0.4rem 0.5rem 0.4rem 0.85rem; min-height: 36px;
+    border-radius: 999px; font-size: 0.82rem; font-weight:650; color: var(--ink);
+  }
+  .chip .chip-remove{
+    cursor:pointer; width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background: #F1F3FA; color: var(--ink-faint); font-size: 0.8rem; border:none;
+  }
+  .chip .chip-remove:hover{ background: var(--danger-soft); color: var(--danger); }
+
+  /* ===== Effect toggle (custom form) ===== */
   .effect-toggle{ display:flex; gap:0.5rem; }
   .effect-btn{ flex:1; min-height:var(--tap-min); border-radius:10px; border:1.5px solid var(--panel-border); background:#fff; font-weight:700; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:0.4rem; }
   .effect-btn.allow.active{ border-color: var(--success); background: var(--success-soft); color: var(--success); }
   .effect-btn.deny.active{ border-color: var(--danger); background: var(--danger-soft); color: var(--danger); }
 
-  .profile-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.9rem; }
-  .profile-card{ position: relative; border: 1.5px solid var(--panel-border); border-radius: var(--radius-md); padding: 1.1rem 1.1rem 1.1rem 3.2rem; cursor: pointer; transition: all .15s ease; background: #fff; min-height: calc(var(--tap-min) + 30px); }
-  .profile-card:hover{ border-color: #C2CAE6; background: #FAFBFF; }
-  .profile-card.active{ border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px rgba(79,70,229,0.14); }
-  .profile-card input{ position: absolute; left: 1rem; top: 1.15rem; width: 18px; height: 18px; accent-color: var(--accent); cursor:pointer; }
-  .profile-icon{ width: 34px; height: 34px; border-radius: 9px; display:flex; align-items:center; justify-content:center; background: var(--accent-soft); color: var(--accent-dark); font-size: 1.05rem; margin-bottom: 0.55rem; }
-  .profile-card.active .profile-icon{ background: var(--accent); color: #fff; }
-  .profile-name{ font-weight: 700; font-size: 0.92rem; margin-bottom: 2px; }
-  .profile-desc{ font-size: 0.78rem; color: var(--ink-soft); line-height:1.4; }
-  .profile-actions{ font-size: 0.68rem; color: var(--ink-faint); font-family:'JetBrains Mono',monospace; margin-top: 0.35rem; line-height:1.5; }
+  /* ===== Condition rows ===== */
+  .condition-row{ border:1px solid var(--panel-border); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 0.6rem; background:#fff; }
+  .condition-op-badge{ font-size:0.68rem; font-weight:700; color: var(--accent-dark); background: var(--accent-soft); padding:0.2rem 0.5rem; border-radius:6px; }
 
-  .adv-check{ display:flex; align-items:center; gap: 0.6rem; min-height: var(--tap-min); border: 1px solid var(--panel-border); border-radius: var(--radius-sm); padding: 0 0.9rem; background: #fff; transition: all .15s ease; }
-  .adv-check:hover{ border-color: #C2CAE6; }
-  .adv-check input{ accent-color: var(--accent); width:17px; height:17px; cursor:pointer; }
-  .adv-check label{ font-size: 0.78rem; cursor:pointer; margin:0; }
-
-  .access-option{ display:flex; align-items:flex-start; gap: 0.85rem; border: 1.5px solid var(--panel-border); border-radius: var(--radius-md); padding: 0.9rem 1.05rem; cursor: pointer; transition: all .15s ease; margin-bottom: 0.65rem; background:#fff; min-height: var(--tap-min); }
-  .access-option:hover{ border-color:#C2CAE6; background:#FAFBFF; }
-  .access-option.active{ border-color: var(--accent); background: var(--accent-soft); }
-  .access-option input{ accent-color: var(--accent); margin-top: 4px; cursor:pointer; }
-  .access-icon{ width: 34px; height:34px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background: var(--teal-soft); color: var(--teal); font-size: 1rem; }
-  .access-option.active .access-icon{ background: var(--accent); color:#fff; }
-  .access-option-title{ font-weight: 700; font-size: 0.9rem; }
-  .access-option-desc{ font-size: 0.78rem; color: var(--ink-soft); }
-
-  .access-editor{ border: 1px dashed #C7D0EA; border-radius: var(--radius-md); padding: 1.1rem; background: #FBFCFE; margin-top: 0.85rem; }
-  .chip-list{ display:flex; flex-wrap:wrap; gap: 0.5rem; margin-bottom: 0.85rem; }
-  .chip{ display:inline-flex; align-items:center; gap:0.45rem; background:#fff; border:1px solid var(--panel-border); padding: 0.4rem 0.5rem 0.4rem 0.85rem; min-height: 36px; border-radius: 999px; font-size: 0.8rem; font-weight:650; color: var(--ink); font-family:'JetBrains Mono',monospace; }
-  .chip .chip-remove{ cursor:pointer; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: #F1F3FA; color: var(--ink-faint); font-size: 0.8rem; border:none; flex-shrink:0; }
-  .chip .chip-remove:hover{ background: var(--danger-soft); color: var(--danger); }
-
-  .warn-banner{ display:flex; align-items:flex-start; gap:0.7rem; border:1.5px solid var(--warn); background:var(--warn-soft); border-radius:var(--radius-md); padding:0.9rem 1.05rem; margin-top:0.85rem; font-size:0.82rem; color:#92400E; }
-  .warn-banner i{ font-size:1.1rem; margin-top:1px; }
-  .confirm-check{ display:flex; align-items:center; gap:0.5rem; margin-top:0.6rem; font-weight:650; font-size:0.82rem; }
-
-  .resource-row{ border: 1px solid var(--panel-border); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 0.75rem; background: #fff; }
+  /* ===== Resources ===== */
+  .resource-row{
+    border: 1px solid var(--panel-border); border-radius: var(--radius-md);
+    padding: 1rem; margin-bottom: 0.75rem; background: #fff;
+  }
   .resource-row .form-check-input{ accent-color: var(--accent); width:17px; height:17px; }
   .resource-example{ font-size: 0.72rem; color: var(--ink-faint); margin-top: 0.4rem;}
+  .resource-type-icon{ color: var(--accent-dark); }
 
-  .btn-add-dashed{ display:flex; align-items:center; justify-content:center; gap: 0.4rem; min-height: var(--tap-min); border: 1.5px dashed #B9C1DE; border-radius: var(--radius-sm); background: #FAFBFF; color: var(--accent-dark); font-weight: 700; font-size: 0.85rem; width: 100%; transition: all .15s ease; }
+  .btn-add-dashed{
+    display:flex; align-items:center; justify-content:center; gap: 0.4rem;
+    min-height: var(--tap-min);
+    border: 1.5px dashed #B9C1DE; border-radius: var(--radius-sm);
+    background: #FAFBFF; color: var(--accent-dark); font-weight: 700; font-size: 0.85rem;
+    width: 100%; transition: all .15s ease;
+  }
   .btn-add-dashed:hover{ background: var(--accent-soft); border-color: var(--accent); }
 
-  .editor-shell{ background: var(--editor-bg); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); border: 1px solid #0B0F22; }
-  .editor-topbar{ display:flex; align-items:center; justify-content:space-between; padding: 0.85rem 1.1rem; background: #141A33; border-bottom: 1px solid var(--editor-line); gap:0.5rem; flex-wrap:wrap; }
+  /* ===== Preview / Editor ===== */
+  .editor-shell{
+    background: var(--editor-bg); border-radius: var(--radius-lg);
+    overflow: hidden; box-shadow: var(--shadow); border: 1px solid #0B0F22;
+  }
+  .editor-topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0.85rem 1.1rem; background: #141A33; border-bottom: 1px solid var(--editor-line);
+  }
   .editor-dots span{ display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:6px; }
   .dot-r{background:#FF5F56;} .dot-y{background:#FFBD2E;} .dot-g{background:#27C93F;}
   .editor-filename{ font-size: 0.78rem; color:#8C97C6; font-family:'JetBrains Mono',monospace; }
-  .mode-switch{ display:flex; background:#0B0F22; border-radius:999px; padding:3px; gap:2px; }
-  .mode-switch button{ border:none; background:none; color:#8C97C6; font-size:0.72rem; font-weight:700; padding:0.35rem 0.7rem; border-radius:999px; }
-  .mode-switch button.active{ background: var(--accent); color:#fff; }
-  #jsonEditor{ margin:0; width: 100%; min-height: 420px; max-height: 560px; resize: vertical; padding: 1.25rem 1.4rem; border: none; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.7; white-space: pre; background: var(--editor-bg); color: #DCE3F5; tab-size: 2; }
+
+  #jsonEditor{
+    margin:0; width: 100%; min-height: 420px; max-height: 560px; resize: vertical;
+    padding: 1.25rem 1.4rem; border: none; outline: none;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; line-height: 1.7;
+    white-space: pre; background: var(--editor-bg); color: #DCE3F5; tab-size: 2;
+  }
   #jsonEditor::selection{ background: rgba(79,70,229,0.45); }
-  .editor-statusbar{ display:flex; align-items:center; justify-content:space-between; padding: 0.6rem 1.1rem; background: #141A33; border-top: 1px solid var(--editor-line); font-size: 0.74rem; color: #8C97C6; gap:0.5rem; flex-wrap:wrap; }
-  .editor-status-ok{ color: #34D399; } .editor-status-err{ color: #F87171; } .editor-status-warn{ color:#FBBF77; }
 
-  .badge-soft{ background: var(--accent-soft); color: var(--accent-dark); font-weight: 700; font-size: 0.7rem; padding: 0.35rem 0.65rem; border-radius: 999px; display:inline-flex; align-items:center; gap: 0.3rem; }
+  .editor-statusbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0.6rem 1.1rem; background: #141A33; border-top: 1px solid var(--editor-line);
+    font-size: 0.74rem; color: #8C97C6;
+  }
+  .editor-status-ok{ color: #34D399; }
+  .editor-status-err{ color: #F87171; }
 
+  .badge-soft{
+    background: var(--accent-soft); color: var(--accent-dark);
+    font-weight: 700; font-size: 0.7rem; padding: 0.35rem 0.65rem; border-radius: 999px;
+    display:inline-flex; align-items:center; gap: 0.3rem;
+  }
+
+  /* ===== Validation ===== */
   .invalid-msg{ font-size: 0.78rem; color: var(--danger); margin-top: 6px; display:none; font-weight:650; align-items:center; gap:0.3rem; }
   .is-invalid-block{ border-color: var(--danger) !important; background: var(--danger-soft) !important; }
   .is-invalid-block .invalid-msg{ display:flex; }
 
+  /* ===== Toast ===== */
   .toast-custom{ border-radius: 12px; border: none; box-shadow: 0 14px 34px -8px rgba(19,27,52,0.4); }
 
-  .btn-spinner{ width: 14px; height:14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; display:inline-block; }
+  /* ===== Spinner ===== */
+  .btn-spinner{
+    width: 14px; height:14px; border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; display:inline-block;
+  }
   @keyframes spin{ to{ transform: rotate(360deg);} }
   .fade-slide-enter{ animation: fadeSlide .22s ease; }
   @keyframes fadeSlide{ from{ opacity:0; transform: translateY(-6px); } to{ opacity:1; transform:none; } }
 
-  .empty-state{ text-align:center; padding: 2rem 1.2rem; border: 1.5px dashed var(--panel-border); border-radius: var(--radius-md); background: #FAFBFD; }
-  .empty-state-icon{ width: 52px; height:52px; border-radius: 14px; margin: 0 auto 0.85rem; background: var(--accent-soft); color: var(--accent-dark); display:flex; align-items:center; justify-content:center; font-size: 1.5rem; }
+  /* ===== Empty States ===== */
+  .empty-state{
+    text-align:center; padding: 2rem 1.2rem; border: 1.5px dashed var(--panel-border);
+    border-radius: var(--radius-md); background: #FAFBFD;
+  }
+  .empty-state-icon{
+    width: 52px; height:52px; border-radius: 14px; margin: 0 auto 0.85rem;
+    background: var(--accent-soft); color: var(--accent-dark);
+    display:flex; align-items:center; justify-content:center; font-size: 1.5rem;
+  }
   .empty-state-title{ font-weight: 700; font-size: 0.92rem; color: var(--ink); margin-bottom: 2px; }
   .empty-state-desc{ font-size: 0.8rem; color: var(--ink-soft); max-width: 40ch; margin: 0 auto; }
 
   ::-webkit-scrollbar{ width:10px; height:10px; }
   ::-webkit-scrollbar-track{ background: transparent; }
   ::-webkit-scrollbar-thumb{ background:#2A3358; border-radius: 10px; }
+
+  /* ===== Footer ===== */
+  .app-footer{ margin-top: 1rem; }
+  .app-footer .social img{ display:block; border-radius: 8px; }
+  .app-footer .social a{ opacity:0.85; transition: opacity .15s ease, transform .15s ease; }
+  .app-footer .social a:hover{ opacity:1; transform: translateY(-2px); }
 
   @media (max-width: 767px){
     .profile-grid{ grid-template-columns: 1fr 1fr; }
@@ -186,16 +385,16 @@
 </head>
 <body>
 
+<!-- ============ TOP BAR ============ -->
 <div class="topbar">
   <div class="container-xl py-2">
     <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
       <div class="d-flex align-items-center gap-2">
-        <div class="brand-mark"><i class="mdi mdi-shield-lock" aria-hidden="true"></i></div>
+        <div class="brand-mark"><span class="mdi mdi-shield-lock"></span></div>
         <div>
           <div class="brand-title">Bucket Policy Generator</div>
-          <div class="brand-sub">AWS S3 Bucket Policy JSON Builder</div>
+          <div class="brand-sub">JSON Access Policy Builder</div>
         </div>
-        <span class="mode-badge ms-2"><i class="mdi mdi-check-decagram"></i> AWS S3 Bucket Policy</span>
       </div>
       <div class="d-flex toolbar-scroll">
         <button class="toolbar-btn" id="btnFormat" type="button" title="Pretty-print the JSON"><i class="mdi mdi-code-braces"></i> Format</button>
@@ -213,191 +412,324 @@
 <div class="container-xl mt-4">
   <div class="row g-4">
 
+    <!-- ============ LEFT: FORM ============ -->
     <div class="col-lg-7">
 
+      <!-- Common Templates -->
+      <div class="section-card" id="sec-templates">
+        <div class="section-head" data-target="body-templates">
+          <div class="d-flex align-items-center gap-3">
+            <div class="section-icon"><i class="mdi mdi-flash-outline"></i></div>
+            <div>
+              <span class="section-eyebrow">Quick Start</span>
+              <h2 class="section-title">Common Templates</h2>
+              <p class="section-desc">Start from a ready-made statement, then tweak it in the Custom builder below</p>
+            </div>
+          </div>
+          <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+        </div>
+        <div class="section-body" id="body-templates">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Bucket Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control mono" id="bucketNameGlobal" placeholder="my-app-bucket">
+              <div class="form-text-hint">Used to build every ARN: <code>arn:aws:s3:::my-app-bucket/*</code></div>
+            </div>
+          </div>
+          <div class="template-grid" id="templateGrid"></div>
+        </div>
+      </div>
+
+      <!-- Statement manager -->
       <div class="section-card" id="sec-statements">
         <div class="statement-strip" id="statementStrip"></div>
-      </div>
-
-      <!-- Policy Information -->
-      <div class="section-card" id="sec-info">
-        <button type="button" class="section-head" data-target="body-info" aria-expanded="true" aria-controls="body-info">
-          <div class="d-flex align-items-center gap-3">
-            <div class="section-icon"><i class="mdi mdi-information-outline" aria-hidden="true"></i></div>
-            <div>
-              <span class="section-eyebrow">Step 1</span>
-              <h2 class="section-title">Policy &amp; Bucket Information</h2>
-              <p class="section-desc">The bucket name is required to build valid ARNs for every resource below</p>
-            </div>
-          </div>
-          <span class="section-chevron"><i class="mdi mdi-chevron-down" aria-hidden="true"></i></span>
-        </button>
-        <div class="section-body" id="body-info">
-          <div class="row g-3">
-            <div class="col-md-6 field-group mb-0">
-              <label class="form-label" for="bucketName">Bucket Name</label>
-              <input type="text" class="form-control mono" id="bucketName" placeholder="my-app-bucket">
-              <div class="form-text-hint">Used to build ARNs like <code>arn:aws:s3:::my-app-bucket/*</code></div>
-              <div class="invalid-msg"><i class="mdi mdi-alert-circle"></i> Enter a valid bucket name (lowercase letters, numbers, dots, hyphens).</div>
-            </div>
-            <div class="col-md-3 field-group mb-0">
-              <label class="form-label" for="policyVersion">Policy Version</label>
-              <input type="text" class="form-control" id="policyVersion" value="2012-10-17">
-            </div>
-            <div class="col-md-3 field-group mb-0">
-              <label class="form-label" for="statementId">Statement ID (Sid)</label>
-              <input type="text" class="form-control" id="statementId">
-            </div>
-          </div>
-          <div class="form-check form-switch mt-2">
-            <input class="form-check-input" type="checkbox" role="switch" id="safeMode" checked>
-            <label class="form-check-label fw-semibold" for="safeMode" style="font-size:0.85rem;">
-              <i class="mdi mdi-shield-check-outline"></i> Beginner Safe Mode — require confirmation before allowing public access
-            </label>
-          </div>
+        <div class="mode-toggle">
+          <button type="button" class="mode-toggle-btn" id="modeGuidedBtn"><i class="mdi mdi-map-marker-path"></i> Guided</button>
+          <button type="button" class="mode-toggle-btn" id="modeCustomBtn"><i class="mdi mdi-tools"></i> Custom Form</button>
+        </div>
+        <div class="section-body pt-3">
+          <p class="form-text-hint mb-0">Guided mode uses friendly permission profiles. Custom Form gives you direct control over Effect, Principal, Action, Resource, and Condition — valid AWS ARN syntax throughout.</p>
         </div>
       </div>
 
-      <!-- Effect -->
-      <div class="section-card" id="sec-effect">
-        <button type="button" class="section-head" data-target="body-effect" aria-expanded="true" aria-controls="body-effect">
-          <div class="d-flex align-items-center gap-3">
-            <div class="section-icon"><i class="mdi mdi-scale-balance" aria-hidden="true"></i></div>
-            <div>
-              <span class="section-eyebrow">Step 2</span>
-              <h2 class="section-title">Effect</h2>
-              <p class="section-desc">Allow grants access. Deny always wins, even over an Allow elsewhere.</p>
+      <!-- ============ GUIDED MODE SECTIONS ============ -->
+      <div id="guidedSections">
+
+        <!-- 1. Policy Information -->
+        <div class="section-card" id="sec-info">
+          <div class="section-head" data-target="body-info">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-information-outline"></i></div>
+              <div>
+                <span class="section-eyebrow">Step 1</span>
+                <h2 class="section-title">Policy Information</h2>
+                <p class="section-desc">Metadata shared by the whole policy document</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-info">
+            <div class="row g-3">
+              <div class="col-md-6 field-group mb-0">
+                <label class="form-label">Policy Version</label>
+                <input type="text" class="form-control" id="policyVersion" value="2012-10-17">
+                <div class="invalid-msg"><i class="mdi mdi-alert-circle"></i> Policy version is required.</div>
+              </div>
+              <div class="col-md-6 field-group mb-0">
+                <label class="form-label">Statement ID (Sid)</label>
+                <input type="text" class="form-control" id="statementId">
+                <div class="invalid-msg"><i class="mdi mdi-alert-circle"></i> Statement ID is required.</div>
+              </div>
             </div>
           </div>
-          <span class="section-chevron"><i class="mdi mdi-chevron-down" aria-hidden="true"></i></span>
-        </button>
-        <div class="section-body" id="body-effect">
-          <div class="effect-toggle">
-            <button type="button" class="effect-btn allow" id="effectAllowBtn"><i class="mdi mdi-check-circle-outline"></i> Allow</button>
-            <button type="button" class="effect-btn deny" id="effectDenyBtn"><i class="mdi mdi-close-circle-outline"></i> Deny</button>
+        </div>
+
+        <!-- 2. Permission Profile -->
+        <div class="section-card" id="sec-profile">
+          <div class="section-head" data-target="body-profile">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-key-variant"></i></div>
+              <div>
+                <span class="section-eyebrow">Step 2</span>
+                <h2 class="section-title">Permission Profile</h2>
+                <p class="section-desc">Choose what people are allowed to do</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
           </div>
-          <div class="form-check mt-3">
-            <input class="form-check-input" type="checkbox" id="requireHttps">
-            <label class="form-check-label" for="requireHttps" style="font-size:0.85rem;">
-              Also require HTTPS for this statement's resources (adds a companion Deny statement for insecure transport)
-            </label>
+          <div class="section-body" id="body-profile">
+            <div class="profile-grid" id="profileGrid"></div>
+            <div class="invalid-msg" id="profileError"><i class="mdi mdi-alert-circle"></i> Select a permission profile.</div>
           </div>
         </div>
+
+        <!-- 3. Advanced Permissions -->
+        <div class="section-card d-none" id="sec-advanced">
+          <div class="section-head" data-target="body-advanced">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-tune-variant"></i></div>
+              <div>
+                <span class="section-eyebrow">Step 3</span>
+                <h2 class="section-title">Advanced Permissions</h2>
+                <p class="section-desc">Hand-pick the exact actions to allow</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-advanced">
+            <div class="row g-2" id="advancedGrid"></div>
+            <div class="invalid-msg" id="advancedError"><i class="mdi mdi-alert-circle"></i> Select at least one action.</div>
+          </div>
+        </div>
+
+        <!-- 4. Access Control -->
+        <div class="section-card" id="sec-access">
+          <div class="section-head" data-target="body-access">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-account-group"></i></div>
+              <div>
+                <span class="section-eyebrow">Step 4</span>
+                <h2 class="section-title">Who can access?</h2>
+                <p class="section-desc">Control the audience, WhatsApp-privacy style</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-access">
+            <div id="accessOptions"></div>
+            <div class="invalid-msg" id="accessError"><i class="mdi mdi-alert-circle"></i> Select an access rule.</div>
+            <div id="accessEditorHost"></div>
+          </div>
+        </div>
+
+        <!-- 5. Resources -->
+        <div class="section-card" id="sec-resources">
+          <div class="section-head" data-target="body-resources">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-folder-key"></i></div>
+              <div>
+                <span class="section-eyebrow">Step 5</span>
+                <h2 class="section-title">Resources</h2>
+                <p class="section-desc">Files and folders this statement applies to</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-resources">
+            <div id="resourceList"></div>
+            <div class="invalid-msg mb-2" id="resourceError"><i class="mdi mdi-alert-circle"></i> Add at least one valid resource.</div>
+            <button type="button" class="btn-add-dashed" id="btnAddResource"><i class="mdi mdi-plus"></i> Add Resource</button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Permission Profile -->
-      <div class="section-card" id="sec-profile">
-        <button type="button" class="section-head" data-target="body-profile" aria-expanded="true" aria-controls="body-profile">
-          <div class="d-flex align-items-center gap-3">
-            <div class="section-icon"><i class="mdi mdi-key-variant" aria-hidden="true"></i></div>
-            <div>
-              <span class="section-eyebrow">Step 3</span>
-              <h2 class="section-title">Permission Profile</h2>
-              <p class="section-desc">Choose what this statement allows or denies</p>
-            </div>
-          </div>
-          <span class="section-chevron"><i class="mdi mdi-chevron-down" aria-hidden="true"></i></span>
-        </button>
-        <div class="section-body" id="body-profile">
-          <div class="profile-grid" id="profileGrid"></div>
-          <div class="invalid-msg" id="profileError"><i class="mdi mdi-alert-circle"></i> Select a permission profile.</div>
-        </div>
-      </div>
+      <!-- ============ CUSTOM FORM MODE ============ -->
+      <div id="customSections" class="d-none">
 
-      <!-- Advanced Permissions -->
-      <div class="section-card d-none" id="sec-advanced">
-        <button type="button" class="section-head" data-target="body-advanced" aria-expanded="true" aria-controls="body-advanced">
-          <div class="d-flex align-items-center gap-3">
-            <div class="section-icon"><i class="mdi mdi-tune-variant" aria-hidden="true"></i></div>
-            <div>
-              <span class="section-eyebrow">Step 3b</span>
-              <h2 class="section-title">Advanced Permissions</h2>
-              <p class="section-desc">Hand-pick the exact <code class="mono">s3:</code> actions</p>
+        <!-- Effect -->
+        <div class="section-card" id="sec-cEffect">
+          <div class="section-head" data-target="body-cEffect">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-scale-balance"></i></div>
+              <div>
+                <span class="section-eyebrow">Custom · 1</span>
+                <h2 class="section-title">Effect</h2>
+                <p class="section-desc">Deny always overrides an Allow anywhere else in the policy</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-cEffect">
+            <div class="effect-toggle">
+              <button type="button" class="effect-btn allow" id="cEffectAllow"><i class="mdi mdi-check-circle-outline"></i> Allow</button>
+              <button type="button" class="effect-btn deny" id="cEffectDeny"><i class="mdi mdi-close-circle-outline"></i> Deny</button>
             </div>
           </div>
-          <span class="section-chevron"><i class="mdi mdi-chevron-down" aria-hidden="true"></i></span>
-        </button>
-        <div class="section-body" id="body-advanced">
-          <div class="row g-2" id="advancedGrid"></div>
-          <div class="invalid-msg" id="advancedError"><i class="mdi mdi-alert-circle"></i> Select at least one action.</div>
         </div>
-      </div>
 
-      <!-- Access Control -->
-      <div class="section-card" id="sec-access">
-        <button type="button" class="section-head" data-target="body-access" aria-expanded="true" aria-controls="body-access">
-          <div class="d-flex align-items-center gap-3">
-            <div class="section-icon"><i class="mdi mdi-account-group" aria-hidden="true"></i></div>
-            <div>
-              <span class="section-eyebrow">Step 4</span>
-              <h2 class="section-title">Who does this apply to?</h2>
-              <p class="section-desc">Maps to a valid AWS <code class="mono">Principal</code></p>
+        <!-- Principal -->
+        <div class="section-card" id="sec-cPrincipal">
+          <div class="section-head" data-target="body-cPrincipal">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-account-group"></i></div>
+              <div>
+                <span class="section-eyebrow">Custom · 2</span>
+                <h2 class="section-title">Principal</h2>
+                <p class="section-desc">Who this statement applies to</p>
+              </div>
             </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
           </div>
-          <span class="section-chevron"><i class="mdi mdi-chevron-down" aria-hidden="true"></i></span>
-        </button>
-        <div class="section-body" id="body-access">
-          <div id="accessOptions"></div>
-          <div class="invalid-msg" id="accessError"><i class="mdi mdi-alert-circle"></i> Select a principal rule.</div>
-          <div id="accessEditorHost"></div>
-          <div id="publicWarning"></div>
+          <div class="section-body" id="body-cPrincipal">
+            <div id="cPrincipalOptions"></div>
+            <div class="invalid-msg" id="cPrincipalError"><i class="mdi mdi-alert-circle"></i> Choose a principal type.</div>
+            <div id="cPrincipalEditorHost"></div>
+          </div>
         </div>
-      </div>
 
-      <!-- Resources -->
-      <div class="section-card" id="sec-resources">
-        <button type="button" class="section-head" data-target="body-resources" aria-expanded="true" aria-controls="body-resources">
-          <div class="d-flex align-items-center gap-3">
-            <div class="section-icon"><i class="mdi mdi-folder-key" aria-hidden="true"></i></div>
-            <div>
-              <span class="section-eyebrow">Step 5</span>
-              <h2 class="section-title">Resources</h2>
-              <p class="section-desc">Converted automatically into <code class="mono">arn:aws:s3:::...</code></p>
+        <!-- Action -->
+        <div class="section-card" id="sec-cAction">
+          <div class="section-head" data-target="body-cAction">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-key-variant"></i></div>
+              <div>
+                <span class="section-eyebrow">Custom · 3</span>
+                <h2 class="section-title">Action</h2>
+                <p class="section-desc">Real <code class="mono">s3:</code> actions this statement covers</p>
+              </div>
             </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
           </div>
-          <span class="section-chevron"><i class="mdi mdi-chevron-down" aria-hidden="true"></i></span>
-        </button>
-        <div class="section-body" id="body-resources">
-          <div id="resourceList"></div>
-          <div class="invalid-msg mb-2" id="resourceError"><i class="mdi mdi-alert-circle"></i> Add at least one valid resource.</div>
-          <button type="button" class="btn-add-dashed" id="btnAddResource"><i class="mdi mdi-plus"></i> Add Resource</button>
+          <div class="section-body" id="body-cAction">
+            <div class="row g-2" id="cActionGrid"></div>
+            <div class="invalid-msg" id="cActionError"><i class="mdi mdi-alert-circle"></i> Select at least one action.</div>
+          </div>
         </div>
+
+        <!-- Resource -->
+        <div class="section-card" id="sec-cResource">
+          <div class="section-head" data-target="body-cResource">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-folder-key"></i></div>
+              <div>
+                <span class="section-eyebrow">Custom · 4</span>
+                <h2 class="section-title">Resource</h2>
+                <p class="section-desc">Built as <code class="mono">arn:aws:s3:::{Bucket}/{Resource}</code></p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-cResource">
+            <div id="cResourceList"></div>
+            <div class="invalid-msg mb-2" id="cResourceError"><i class="mdi mdi-alert-circle"></i> Add at least one resource path (use <code>*</code> for the whole bucket).</div>
+            <button type="button" class="btn-add-dashed" id="btnAddCResource"><i class="mdi mdi-plus"></i> Add Resource</button>
+          </div>
+        </div>
+
+        <!-- Condition -->
+        <div class="section-card" id="sec-cCondition">
+          <div class="section-head" data-target="body-cCondition">
+            <div class="d-flex align-items-center gap-3">
+              <div class="section-icon"><i class="mdi mdi-shield-key-outline"></i></div>
+              <div>
+                <span class="section-eyebrow">Custom · 5</span>
+                <h2 class="section-title">Condition <span class="text-body-secondary fw-normal">(optional)</span></h2>
+                <p class="section-desc">e.g. require HTTPS, restrict by IP, restrict by principal</p>
+              </div>
+            </div>
+            <span class="section-chevron"><i class="mdi mdi-chevron-down"></i></span>
+          </div>
+          <div class="section-body" id="body-cCondition">
+            <div id="cConditionList"></div>
+            <button type="button" class="btn-add-dashed" id="btnAddCCondition"><i class="mdi mdi-plus"></i> Add Condition</button>
+          </div>
+        </div>
+
       </div>
 
     </div>
 
+    <!-- ============ RIGHT: PREVIEW / EDITOR ============ -->
     <div class="col-lg-5">
       <div class="position-sticky" style="top: 90px;">
         <div class="editor-shell">
           <div class="editor-topbar">
             <div class="d-flex align-items-center">
-              <span class="editor-dots" aria-hidden="true"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></span>
+              <span class="editor-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></span>
               <span class="editor-filename ms-2">bucket-policy.json</span>
-            </div>
-            <div class="mode-switch" role="group" aria-label="Editor mode">
-              <button type="button" id="modeFormBtn" class="active">Form-managed</button>
-              <button type="button" id="modeRawBtn">Raw JSON</button>
             </div>
             <span class="badge-soft" id="statusBadge"><i class="mdi mdi-circle-medium"></i> Live</span>
           </div>
-          <textarea id="jsonEditor" class="mono" spellcheck="false" aria-label="Generated policy JSON, editable"></textarea>
+          <textarea id="jsonEditor" class="mono" spellcheck="false"></textarea>
           <div class="editor-statusbar">
-            <span id="editorStatus"><i class="mdi mdi-pencil-outline"></i> Form-managed — the form drives this JSON</span>
+            <span id="editorStatus"><i class="mdi mdi-pencil-outline"></i> Editable — type JSON directly, or use the form on the left</span>
             <span id="editorMeta">0 statements</span>
           </div>
         </div>
-        <p class="form-text-hint mt-2 px-1">In <strong>Raw JSON</strong> mode your edits are never overwritten, and existing <code class="mono">Condition</code> blocks are preserved. Switch back to <strong>Form-managed</strong> to resync from the form.</p>
+        <p class="form-text-hint mt-2 px-1">This editor is fully editable. Add extra statements by hand, or use <strong>+ Add Statement</strong> above the form — the form always edits the active statement.</p>
       </div>
     </div>
 
   </div>
 </div>
 
+<!-- Toast -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080;">
-  <div id="liveToast" class="toast toast-custom align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+  <div id="liveToast" class="toast toast-custom align-items-center text-white bg-dark border-0" role="alert">
     <div class="d-flex">
       <div class="toast-body" id="toastBody">Copied to clipboard.</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<div class="container-xl">
+  <div class="app-footer text-center py-4">
+    <div class="social d-flex justify-content-center gap-3 mb-3">
+      <a href="https://dev.to/tharvbytes" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/dev.png" alt="Dev.to" width="28" height="28">
+      </a>
+      <a href="https://medium.com/@tharveshmuhaideen" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/medium.png" alt="Medium" width="28" height="28">
+      </a>
+      <a href="https://www.youtube.com/@tharveshmuhaideen" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/youtube.png" alt="YouTube" width="28" height="28">
+      </a>
+      <a href="https://linkedin.com/in/tharvesh2005" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/linkedin.png" alt="LinkedIn" width="28" height="28">
+      </a>
+      <a href="https://github.com/tharvesh2026" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/github.png" alt="GitHub" width="28" height="28">
+      </a>
+      <a href="https://www.google.com/search?q=tharvesh+muhiadeen" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/Tharvesh2026/Web-Source@refs/heads/main/google.png" alt="Google" width="28" height="28">
+      </a>
+    </div>
+    <div class="footer" style="font-size:0.85rem; color: var(--ink-soft);">
+      <strong>Tharvbytes.dev</strong><br>
+      Learn • Build • Share<br><br>
+      Thank you for being part of my journey ❤️
     </div>
   </div>
 </div>
@@ -408,222 +740,144 @@
   'use strict';
 
   // =====================================================================
-  // CONSTANTS — real, valid AWS S3 actions only
+  // GUIDED MODE constants (unchanged from the version you liked)
   // =====================================================================
-  const BUCKET_LEVEL_ACTIONS = new Set(['s3:ListBucket','s3:GetBucketLocation','s3:ListBucketVersions']);
-  // everything else in our vocabulary is object-level; s3:* is treated as both.
-
   const PERMISSION_PROFILES = [
-    { key:'read',      icon:'mdi-eye',              name:'Read Only',   desc:'List the bucket and read objects',
-      actions:['s3:ListBucket','s3:GetObject'] },
-    { key:'download',  icon:'mdi-tray-arrow-down',  name:'Download Only', desc:'Read objects, no listing',
-      actions:['s3:GetObject'] },
-    { key:'upload',    icon:'mdi-tray-arrow-up',    name:'Upload Only', desc:'Write new objects only',
-      actions:['s3:PutObject'] },
-    { key:'readwrite', icon:'mdi-pencil',           name:'Read & Write', desc:'List, read, and write objects',
-      actions:['s3:ListBucket','s3:GetObject','s3:PutObject'] },
-    { key:'delete',    icon:'mdi-delete',           name:'Delete', desc:'Remove objects',
-      actions:['s3:DeleteObject'] },
-    { key:'full',      icon:'mdi-star',             name:'Full Access', desc:'All S3 actions on this bucket',
-      actions:['s3:*'] },
+    { key:'read',      icon:'mdi-eye',              name:'Read Only',   desc:'View and browse files only',
+      actions:['s3files:ClientMount','s3files:GetAccessPoint'] },
+    { key:'download',  icon:'mdi-tray-arrow-down',  name:'Download Only', desc:'Download files, no editing',
+      actions:['s3files:GetAccessPoint'] },
+    { key:'upload',    icon:'mdi-tray-arrow-up',    name:'Upload Only', desc:'Upload new files only',
+      actions:['s3files:ClientMount'] },
+    { key:'readwrite', icon:'mdi-pencil',           name:'Read & Write', desc:'Full read and write access',
+      actions:['s3files:ClientMount','s3files:GetAccessPoint','s3files:GetSynchronizationConfiguration','s3files:ListTagsForResource'] },
+    { key:'delete',    icon:'mdi-delete',           name:'Delete', desc:'Remove files and objects',
+      actions:['s3files:DeleteObject'] },
+    { key:'full',      icon:'mdi-star',             name:'Full Access', desc:'Unrestricted access to everything',
+      actions:['s3files:*'] },
     { key:'advanced',  icon:'mdi-cog',              name:'Advanced (Custom)', desc:'Manually select individual actions',
       actions:[] }
   ];
 
   const ADVANCED_ACTIONS = [
-    's3:ListBucket','s3:GetBucketLocation','s3:GetObject','s3:PutObject','s3:PutObjectAcl',
-    's3:DeleteObject','s3:GetObjectVersion','s3:DeleteObjectVersion'
+    's3files:ListTagsForResource','s3files:GetSynchronizationConfiguration','s3files:ClientMount',
+    's3files:GetAccessPoint','s3files:DeleteObject','s3files:PutObject','s3files:GetObject','s3files:ListBucket'
   ];
 
   const ACCESS_OPTIONS = [
-    { key:'none',     icon:'mdi-account-off',      title:'No One',            desc:'Explicit Deny to everyone for these actions/resources' },
-    { key:'public',   icon:'mdi-earth',            title:'Everyone (Public)', desc:'Principal "*" — anyone on the internet' },
-    { key:'specific', icon:'mdi-account-key',      title:'Specific Principals', desc:'One or more IAM role/user/root ARNs' },
-    { key:'except',   icon:'mdi-account-cancel',   title:'Everyone Except',   desc:'Public, excluding the ARNs you list' }
+    { key:'no_one',     icon:'mdi-account-off',      title:'No One',          desc:'Deny all — nobody can access this resource' },
+    { key:'everyone',   icon:'mdi-earth',             title:'Everyone',        desc:'Public access — anyone can access' },
+    { key:'department', icon:'mdi-domain',            title:'Department Only', desc:'Restrict access to specific departments' },
+    { key:'domain',     icon:'mdi-at',                title:'Domain Only',     desc:'Restrict access to specific email domains' },
+    { key:'share',      icon:'mdi-account-multiple',  title:'Share Only With', desc:'Restrict access to specific people' },
+    { key:'except',     icon:'mdi-account-cancel',    title:'Everyone Except', desc:'Allow everyone except selected people' }
   ];
 
-  const ARN_HINT = 'arn:aws:iam::123456789012:role/MyRole or arn:aws:iam::123456789012:root';
+  const LIST_CONFIG = {
+    department: { label:'Department', placeholder:'e.g. Finance', example:'Finance, IT, HR, Operations' },
+    domain:     { label:'Domain',     placeholder:'e.g. *@company.com', example:'*@gmail.com, *@company.com' },
+    share:      { label:'Person',     placeholder:'e.g. john@gmail.com', example:'john@gmail.com, alice@gmail.com' },
+    except:     { label:'Exception',  placeholder:'e.g. john@gmail.com', example:'john@gmail.com, admin@gmail.com' }
+  };
 
   // =====================================================================
-  // GLOBAL STATE
+  // CUSTOM FORM constants — real AWS grammar
+  // =====================================================================
+  const CUSTOM_ACTIONS = [
+    's3:GetObject','s3:PutObject','s3:DeleteObject','s3:ListBucket',
+    's3:GetBucketLocation','s3:PutObjectAcl','s3:GetObjectVersion','s3:DeleteObjectVersion','s3:*'
+  ];
+
+  const CUSTOM_PRINCIPAL_OPTIONS = [
+    { key:'everyone', icon:'mdi-earth',        title:'Everyone',       desc:'Principal "*" — public, anyone on the internet' },
+    { key:'role',     icon:'mdi-account-cog',  title:'IAM Role',       desc:'One or more role ARNs (arn:aws:iam::ACCOUNT:role/Name)' },
+    { key:'people',   icon:'mdi-account-key',  title:'Specific People', desc:'One or more IAM user ARNs (arn:aws:iam::ACCOUNT:user/Name)' }
+  ];
+
+  const CONDITION_OPERATORS = [
+    'StringEquals','StringNotEquals','IpAddress','NotIpAddress','Bool','ArnEquals','ArnLike','NumericLessThan','DateGreaterThan'
+  ];
+  const CONDITION_KEY_HINTS = {
+    'IpAddress':'aws:SourceIp', 'NotIpAddress':'aws:SourceIp', 'Bool':'aws:SecureTransport',
+    'StringEquals':'aws:PrincipalArn', 'StringNotEquals':'aws:PrincipalArn',
+    'ArnEquals':'aws:SourceArn', 'ArnLike':'aws:SourceArn',
+    'NumericLessThan':'s3:max-keys', 'DateGreaterThan':'aws:CurrentTime'
+  };
+
+  const TEMPLATES = [
+    {
+      key:'public-read-website', icon:'mdi-web', name:'Public Read — Static Website',
+      desc:'Anyone can GET objects in the bucket. Typical for S3 static website hosting.',
+      apply: (bucket) => ({
+        sid:'PublicReadGetObject', effect:'Allow',
+        principalType:'everyone', principalArns:[],
+        actions:['s3:GetObject'],
+        resources:[{ id:0, path:'*', recursive:false }],
+        conditions:[]
+      })
+    },
+    {
+      key:'https-only', icon:'mdi-lock-check-outline', name:'Require HTTPS, Deny HTTP',
+      desc:'Denies every request to the bucket that does not use HTTPS.',
+      apply: (bucket) => ({
+        sid:'DenyInsecureTransport', effect:'Deny',
+        principalType:'everyone', principalArns:[],
+        actions:['s3:*'],
+        resources:[{ id:0, path:'*', recursive:false }, { id:1, path:'', recursive:false, bucketOnly:true }],
+        conditions:[{ id:0, operator:'Bool', key:'aws:SecureTransport', value:'false' }]
+      })
+    },
+    {
+      key:'ip-restrict', icon:'mdi-map-marker-radius-outline', name:'IP Restriction',
+      desc:'Denies access to everyone except the IP ranges you allow-list.',
+      apply: (bucket) => ({
+        sid:'DenyOutsideAllowedIP', effect:'Deny',
+        principalType:'everyone', principalArns:[],
+        actions:['s3:*'],
+        resources:[{ id:0, path:'*', recursive:false }, { id:1, path:'', recursive:false, bucketOnly:true }],
+        conditions:[{ id:0, operator:'NotIpAddress', key:'aws:SourceIp', value:'203.0.113.0/24' }]
+      })
+    }
+  ];
+
+  // =====================================================================
+  // STATE
   // =====================================================================
   const app = {
+    version: '2012-10-17',
     bucketName: '',
-    beginnerSafeMode: true,
-    editorMode: 'form',   // 'form' | 'raw'
     statements: [],
     activeId: null
   };
   let uid = 0;
   let resourceUid = 0;
+  let condUid = 0;
   let suppressEditorSync = false;
 
   function newStatement(sid){
     return {
       id: ++uid,
       sid: sid || ('Statement' + uid),
-      effect: 'Allow',
+      mode: 'guided',                 // 'guided' | 'custom'
+      // guided fields
       profile: null,
       advancedActions: new Set(),
-      principalMode: null,      // 'none' | 'public' | 'specific' | 'except'
-      principalArns: [],
-      requireHttps: false,
-      rawCondition: null,       // preserved from raw JSON edits
-      resources: [ { id: ++resourceUid, type: 'file', path: '', recursive: false } ]
+      accessMode: null,
+      lists: { department: [], domain: [], share: [], except: [] },
+      resources: [ { id: ++resourceUid, type: 'file', path: '', recursive: false } ],
+      // custom fields
+      custom: {
+        effect: 'Allow',
+        principalType: null,          // 'everyone' | 'role' | 'people'
+        principalArns: [],
+        actions: new Set(),
+        resources: [ { id: ++resourceUid, path: '', recursive: false, bucketOnly:false } ],
+        conditions: []
+      }
     };
   }
 
   function getActive(){ return app.statements.find(s => s.id === app.activeId); }
-
-  // =====================================================================
-  // D) HELPER FUNCTIONS — required by spec
-  // =====================================================================
-
-  // buildS3ActionsFromProfile(profile, advancedActions) -> string[]
-  function buildS3ActionsFromProfile(profile, advancedActions){
-    if(profile === 'advanced') return [...advancedActions];
-    const p = PERMISSION_PROFILES.find(p => p.key === profile);
-    return p ? [...p.actions] : [];
-  }
-
-  // buildS3Resources(bucketName, prefixes, actions) -> string[] of ARNs
-  // Splits into bucket-level ARNs (for ListBucket-type actions) and
-  // object-level ARNs (for everything else), and returns the union —
-  // this mirrors AWS's own example combo policies (Resource: [bucketArn, bucketArn/*]).
-  function buildS3Resources(bucketName, prefixes, actions){
-    if(!bucketName) return [];
-    const bucketArn = `arn:aws:s3:::${bucketName}`;
-    const needsBucketLevel = actions.some(a => a === 's3:*' || BUCKET_LEVEL_ACTIONS.has(a));
-    const needsObjectLevel = actions.some(a => a === 's3:*' || !BUCKET_LEVEL_ACTIONS.has(a));
-
-    const cleanPrefixes = prefixes
-      .filter(r => r.path && r.path.trim() !== '')
-      .map(r => {
-        let path = r.path.trim().replace(/^\/+/, '');
-        if(r.recursive && !path.endsWith('/*')){
-          path = path.endsWith('/') ? path + '*' : path + '/*';
-        }
-        return path;
-      });
-
-    const out = [];
-    if(needsBucketLevel) out.push(bucketArn);
-    if(needsObjectLevel){
-      if(cleanPrefixes.length === 0) out.push(`${bucketArn}/*`);
-      else cleanPrefixes.forEach(p => out.push(`${bucketArn}/${p}`));
-    }
-    return [...new Set(out)];
-  }
-
-  // buildPrincipal(principalMode, values) -> { principal, notPrincipal, extraCondition }
-  function buildPrincipal(principalMode, values){
-    switch(principalMode){
-      case 'none':     return { principal: '*', notPrincipal: null, extraCondition: null }; // paired with Effect=Deny by the caller
-      case 'public':   return { principal: '*', notPrincipal: null, extraCondition: null };
-      case 'specific': return { principal: { AWS: [...values] }, notPrincipal: null, extraCondition: null };
-      case 'except':
-        return {
-          principal: '*',
-          notPrincipal: null,
-          extraCondition: { StringNotEquals: { 'aws:PrincipalArn': [...values] } }
-        };
-      default: return { principal: '*', notPrincipal: null, extraCondition: null };
-    }
-  }
-
-  // validateStatement(statement, bucketName) -> [{field, message}]
-  function validateStatement(s, bucketName){
-    const errors = [];
-    if(!bucketName || !/^[a-z0-9.-]{3,63}$/.test(bucketName)){
-      errors.push({ field:'bucketName', message:'Bucket name must be 3-63 lowercase letters, numbers, dots, or hyphens.' });
-    }
-    if(!s.sid || !s.sid.trim()){
-      errors.push({ field:'sid', message:'Statement needs a Sid.' });
-    }
-    if(!s.profile){
-      errors.push({ field:'profile', message:'Choose a permission profile.' });
-    }
-    if(s.profile === 'advanced' && s.advancedActions.size === 0){
-      errors.push({ field:'advanced', message:'Pick at least one action in Advanced mode.' });
-    }
-    if(!s.principalMode){
-      errors.push({ field:'access', message:'Choose who this statement applies to.' });
-    }
-    if((s.principalMode === 'specific' || s.principalMode === 'except') && s.principalArns.length === 0){
-      errors.push({ field:'access', message:'Add at least one IAM ARN.' });
-    }
-    const badArn = s.principalArns.find(a => !/^arn:aws:iam::\d{12}:(root|(role|user)\/.+)$/.test(a));
-    if(badArn){
-      errors.push({ field:'access', message:`"${badArn}" doesn't look like a valid IAM ARN. Expected format: ${ARN_HINT}` });
-    }
-    const hasResource = s.resources.some(r => r.path && r.path.trim() !== '');
-    if(!hasResource){
-      errors.push({ field:'resources', message:'Add at least one file or folder.' });
-    }
-    if(s.principalMode === 'public' && app.beginnerSafeMode && !s._publicConfirmed){
-      errors.push({ field:'access', message:'Confirm public access is intentional (Beginner Safe Mode).' });
-    }
-    return errors;
-  }
-
-  // normalizePolicy(policy) -> policy with arrays normalized, dedup'd, empty statements dropped
-  function normalizePolicy(policy){
-    const norm = { Version: policy.Version || '2012-10-17', Statement: [] };
-    (policy.Statement || []).forEach(stmt => {
-      const clean = { ...stmt };
-      if(clean.Action && !Array.isArray(clean.Action)) clean.Action = [clean.Action];
-      if(clean.Resource && !Array.isArray(clean.Resource)) clean.Resource = [clean.Resource];
-      if(Array.isArray(clean.Action)) clean.Action = [...new Set(clean.Action)];
-      if(Array.isArray(clean.Resource)) clean.Resource = [...new Set(clean.Resource)];
-      norm.Statement.push(clean);
-    });
-    return norm;
-  }
-
-  // =====================================================================
-  // STATEMENT -> JSON
-  // =====================================================================
-  function buildStatementObject(s){
-    const actions = buildS3ActionsFromProfile(s.profile, s.advancedActions);
-    const resources = buildS3Resources(app.bucketName, s.resources, actions);
-    const effect = s.principalMode === 'none' ? 'Deny' : s.effect;
-    const { principal, extraCondition } = buildPrincipal(s.principalMode, s.principalArns);
-
-    const statement = {
-      Sid: s.sid || 'Statement1',
-      Effect: effect,
-      Principal: principal,
-      Action: actions,
-      Resource: resources
-    };
-
-    const condition = {};
-    if(s.rawCondition && typeof s.rawCondition === 'object') Object.assign(condition, s.rawCondition);
-    if(extraCondition) Object.assign(condition, extraCondition);
-    if(Object.keys(condition).length) statement.Condition = condition;
-
-    const out = [statement];
-
-    if(s.requireHttps){
-      out.push({
-        Sid: (s.sid || 'Statement1') + 'DenyInsecureTransport',
-        Effect: 'Deny',
-        Principal: '*',
-        Action: 's3:*',
-        Resource: resources.length ? resources : [`arn:aws:s3:::${app.bucketName}`, `arn:aws:s3:::${app.bucketName}/*`],
-        Condition: { Bool: { 'aws:SecureTransport': 'false' } }
-      });
-    }
-
-    return out;
-  }
-
-  function generatePolicyObject(){
-    const version = document.getElementById('policyVersion').value.trim() || '2012-10-17';
-    let statements = [];
-    app.statements.forEach(s => { statements = statements.concat(buildStatementObject(s)); });
-    return normalizePolicy({ Version: version, Statement: statements });
-  }
 
   // =====================================================================
   // INIT
@@ -632,6 +886,9 @@
     renderProfileCards();
     renderAdvancedGrid();
     renderAccessOptions();
+    renderTemplateGrid();
+    renderCustomPrincipalOptions();
+    renderCustomActionGrid();
 
     app.statements.push(newStatement('Statement1'));
     app.activeId = app.statements[0].id;
@@ -644,26 +901,70 @@
   }
 
   // =====================================================================
-  // STATEMENT STRIP
+  // TEMPLATES
+  // =====================================================================
+  function renderTemplateGrid(){
+    const grid = document.getElementById('templateGrid');
+    grid.innerHTML = TEMPLATES.map(t => `
+      <button type="button" class="template-card" data-key="${t.key}">
+        <div class="template-icon"><i class="mdi ${t.icon}"></i></div>
+        <div class="template-name">${t.name}</div>
+        <div class="template-desc">${t.desc}</div>
+        <div class="template-use"><i class="mdi mdi-arrow-right-thin"></i> Use this template</div>
+      </button>
+    `).join('');
+    grid.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', () => applyTemplate(card.dataset.key));
+    });
+  }
+
+  function applyTemplate(key){
+    const tpl = TEMPLATES.find(t => t.key === key);
+    if(!tpl) return;
+    const preset = tpl.apply(app.bucketName);
+
+    const s = newStatement(preset.sid);
+    s.mode = 'custom';
+    s.custom.effect = preset.effect;
+    s.custom.principalType = preset.principalType;
+    s.custom.principalArns = [...preset.principalArns];
+    preset.actions.forEach(a => s.custom.actions.add(a));
+    s.custom.resources = preset.resources.map((r, i) => ({ id: ++resourceUid, path: r.path, recursive: r.recursive, bucketOnly: !!r.bucketOnly }));
+    s.custom.conditions = preset.conditions.map(c => ({ id: ++condUid, operator: c.operator, key: c.key, value: c.value }));
+
+    app.statements.push(s);
+    app.activeId = s.id;
+
+    renderStatementStrip();
+    loadActiveIntoForm();
+    updatePreview();
+    showToast(`"${tpl.name}" template applied as a new statement.`);
+  }
+
+  // =====================================================================
+  // STATEMENT STRIP + MODE TOGGLE
   // =====================================================================
   function renderStatementStrip(){
     const host = document.getElementById('statementStrip');
     host.innerHTML = app.statements.map(s => `
-      <span class="statement-chip ${s.principalMode==='none'?'deny':''} ${s.id === app.activeId ? 'active' : ''}" data-id="${s.id}" role="button" tabindex="0">
-        <i class="mdi mdi-file-document-outline"></i> ${escapeHTML(s.sid || 'Untitled')}
-        ${app.statements.length > 1 ? `<button type="button" class="chip-close" data-remove="${s.id}" aria-label="Remove statement ${escapeHTML(s.sid)}"><i class="mdi mdi-close"></i></button>` : ''}
+      <span class="statement-chip ${s.mode==='custom' && s.custom.effect==='Deny' ? 'deny' : ''} ${s.id === app.activeId ? 'active' : ''}" data-id="${s.id}">
+        <i class="mdi ${s.mode === 'custom' ? 'mdi-tools' : 'mdi-file-document-outline'}"></i> ${escapeHTML(s.sid || 'Untitled')}
+        ${app.statements.length > 1 ? `<button type="button" class="chip-close" data-remove="${s.id}"><i class="mdi mdi-close"></i></button>` : ''}
       </span>
     `).join('') + `<button type="button" class="btn-add-statement" id="btnAddStatement"><i class="mdi mdi-plus"></i> Add Statement</button>`;
 
     host.querySelectorAll('.statement-chip').forEach(chip => {
-      chip.addEventListener('click', e => { if(!e.target.closest('.chip-close')) switchStatement(parseInt(chip.dataset.id, 10)); });
-      chip.addEventListener('keydown', e => {
-        if((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.chip-close')){
-          e.preventDefault(); switchStatement(parseInt(chip.dataset.id, 10));
-        }
+      chip.addEventListener('click', e => {
+        if(e.target.closest('.chip-close')) return;
+        switchStatement(parseInt(chip.dataset.id, 10));
       });
     });
-    host.querySelectorAll('.chip-close').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); removeStatement(parseInt(btn.dataset.remove, 10)); }));
+    host.querySelectorAll('.chip-close').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        removeStatement(parseInt(btn.dataset.remove, 10));
+      });
+    });
     document.getElementById('btnAddStatement').addEventListener('click', addStatement);
   }
 
@@ -671,45 +972,89 @@
     const s = newStatement('Statement' + (app.statements.length + 1));
     app.statements.push(s);
     app.activeId = s.id;
-    renderStatementStrip(); loadActiveIntoForm(); updatePreview();
+    renderStatementStrip();
+    loadActiveIntoForm();
+    updatePreview();
     showToast('New statement added.');
   }
+
   function removeStatement(id){
     app.statements = app.statements.filter(s => s.id !== id);
-    if(app.activeId === id){ app.activeId = app.statements[0].id; loadActiveIntoForm(); }
-    renderStatementStrip(); updatePreview();
+    if(app.activeId === id){
+      app.activeId = app.statements[0].id;
+      loadActiveIntoForm();
+    }
+    renderStatementStrip();
+    updatePreview();
   }
-  function switchStatement(id){ app.activeId = id; renderStatementStrip(); loadActiveIntoForm(); }
+
+  function switchStatement(id){
+    app.activeId = id;
+    renderStatementStrip();
+    loadActiveIntoForm();
+  }
+
+  function setStatementMode(mode){
+    const s = getActive();
+    if(!s) return;
+    s.mode = mode;
+    document.getElementById('guidedSections').classList.toggle('d-none', mode !== 'guided');
+    document.getElementById('customSections').classList.toggle('d-none', mode !== 'custom');
+    document.getElementById('modeGuidedBtn').classList.toggle('active', mode === 'guided');
+    document.getElementById('modeCustomBtn').classList.toggle('active', mode === 'custom');
+    renderStatementStrip();
+    updatePreview();
+  }
 
   function loadActiveIntoForm(){
     const s = getActive();
     if(!s) return;
 
+    document.getElementById('policyVersion').value = app.version;
     document.getElementById('statementId').value = s.sid;
+    document.getElementById('bucketNameGlobal').value = app.bucketName;
 
-    document.getElementById('effectAllowBtn').classList.toggle('active', s.effect === 'Allow' && s.principalMode !== 'none');
-    document.getElementById('effectDenyBtn').classList.toggle('active', s.effect === 'Deny' || s.principalMode === 'none');
-    document.getElementById('effectAllowBtn').disabled = s.principalMode === 'none';
-    document.getElementById('requireHttps').checked = s.requireHttps;
+    document.getElementById('guidedSections').classList.toggle('d-none', s.mode !== 'guided');
+    document.getElementById('customSections').classList.toggle('d-none', s.mode !== 'custom');
+    document.getElementById('modeGuidedBtn').classList.toggle('active', s.mode === 'guided');
+    document.getElementById('modeCustomBtn').classList.toggle('active', s.mode === 'custom');
 
+    // ---- Guided fields ----
     document.querySelectorAll('.profile-card').forEach(c => {
       const active = c.dataset.key === s.profile;
-      c.classList.toggle('active', active); c.querySelector('input').checked = active;
+      c.classList.toggle('active', active);
+      c.querySelector('input').checked = active;
     });
-    document.getElementById('sec-advanced').classList.toggle('d-none', s.profile !== 'advanced');
+    const advSection = document.getElementById('sec-advanced');
+    if(s.profile === 'advanced'){ advSection.classList.remove('d-none'); } else { advSection.classList.add('d-none'); }
     document.querySelectorAll('.form-check-input[id^="adv-"]').forEach(cb => { cb.checked = s.advancedActions.has(cb.value); });
 
     document.querySelectorAll('.access-option').forEach(el => {
-      const active = el.dataset.key === s.principalMode;
-      el.classList.toggle('active', active); el.querySelector('input').checked = active;
+      const active = el.dataset.key === s.accessMode;
+      el.classList.toggle('active', active);
+      el.querySelector('input').checked = active;
     });
     renderAccessEditor();
     renderResources();
+
+    // ---- Custom fields ----
+    document.getElementById('cEffectAllow').classList.toggle('active', s.custom.effect === 'Allow');
+    document.getElementById('cEffectDeny').classList.toggle('active', s.custom.effect === 'Deny');
+    document.querySelectorAll('.c-principal-option').forEach(el => {
+      const active = el.dataset.key === s.custom.principalType;
+      el.classList.toggle('active', active);
+      el.querySelector('input').checked = active;
+    });
+    renderCustomPrincipalEditor();
+    document.querySelectorAll('.form-check-input[id^="cact-"]').forEach(cb => { cb.checked = s.custom.actions.has(cb.value); });
+    renderCustomResources();
+    renderCustomConditions();
+
     clearAllErrors();
   }
 
   // =====================================================================
-  // PROFILE / ADVANCED
+  // GUIDED: PROFILE / ADVANCED / ACCESS / RESOURCES (unchanged logic)
   // =====================================================================
   function renderProfileCards(){
     const grid = document.getElementById('profileGrid');
@@ -719,20 +1064,31 @@
         <span class="profile-icon"><i class="mdi ${p.icon}"></i></span>
         <div class="profile-name">${p.name}</div>
         <div class="profile-desc">${p.desc}</div>
-        ${p.actions.length ? `<div class="profile-actions">${p.actions.join(', ')}</div>` : ''}
       </label>
     `).join('');
-    grid.querySelectorAll('.profile-card').forEach(card => card.addEventListener('click', () => selectProfile(card.dataset.key)));
+    grid.querySelectorAll('.profile-card').forEach(card => {
+      card.addEventListener('click', () => selectProfile(card.dataset.key));
+    });
   }
 
   function selectProfile(key){
-    const s = getActive(); if(!s) return;
+    const s = getActive();
+    if(!s) return;
     s.profile = key;
-    document.querySelectorAll('.profile-card').forEach(c => { const a = c.dataset.key === key; c.classList.toggle('active', a); c.querySelector('input').checked = a; });
+    document.querySelectorAll('.profile-card').forEach(c => {
+      const active = c.dataset.key === key;
+      c.classList.toggle('active', active);
+      c.querySelector('input').checked = active;
+    });
     clearFieldError('sec-profile', 'profileError');
+
     const advSection = document.getElementById('sec-advanced');
-    if(key === 'advanced'){ advSection.classList.remove('d-none'); advSection.classList.add('fade-slide-enter'); }
-    else advSection.classList.add('d-none');
+    if(key === 'advanced'){
+      advSection.classList.remove('d-none');
+      advSection.classList.add('fade-slide-enter');
+    } else {
+      advSection.classList.add('d-none');
+    }
     updatePreview();
   }
 
@@ -742,55 +1098,49 @@
       <div class="col-md-6">
         <div class="adv-check">
           <input type="checkbox" value="${action}" id="adv-${i}">
-          <label class="mono" for="adv-${i}" style="font-size:0.78rem;">${action}</label>
+          <label class="mono" for="adv-${i}" style="font-size:0.8rem;">${action}</label>
         </div>
       </div>
     `).join('');
-    grid.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', () => {
-      const s = getActive(); if(!s) return;
-      if(cb.checked) s.advancedActions.add(cb.value); else s.advancedActions.delete(cb.value);
-      clearFieldError('sec-advanced', 'advancedError'); updatePreview();
-    }));
+
+    grid.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const s = getActive();
+        if(!s) return;
+        if(cb.checked) s.advancedActions.add(cb.value);
+        else s.advancedActions.delete(cb.value);
+        clearFieldError('sec-advanced', 'advancedError');
+        updatePreview();
+      });
+    });
   }
 
-  // =====================================================================
-  // EFFECT
-  // =====================================================================
-  function setEffect(effect){
-    const s = getActive(); if(!s || s.principalMode === 'none') return;
-    s.effect = effect;
-    document.getElementById('effectAllowBtn').classList.toggle('active', effect === 'Allow');
-    document.getElementById('effectDenyBtn').classList.toggle('active', effect === 'Deny');
-    updatePreview();
-  }
-
-  // =====================================================================
-  // ACCESS CONTROL
-  // =====================================================================
   function renderAccessOptions(){
     const host = document.getElementById('accessOptions');
     host.innerHTML = ACCESS_OPTIONS.map(opt => `
       <label class="access-option" data-key="${opt.key}">
         <input type="radio" name="accessMode" value="${opt.key}">
         <span class="access-icon"><i class="mdi ${opt.icon}"></i></span>
-        <div><div class="access-option-title">${opt.title}</div><div class="access-option-desc">${opt.desc}</div></div>
+        <div>
+          <div class="access-option-title">${opt.title}</div>
+          <div class="access-option-desc">${opt.desc}</div>
+        </div>
       </label>
     `).join('');
-    host.querySelectorAll('.access-option').forEach(el => el.addEventListener('click', () => selectAccessMode(el.dataset.key)));
+    host.querySelectorAll('.access-option').forEach(el => {
+      el.addEventListener('click', () => selectAccessMode(el.dataset.key));
+    });
   }
 
   function selectAccessMode(key){
-    const s = getActive(); if(!s) return;
-    s.principalMode = key;
-    s._publicConfirmed = false;
-    if(key === 'none'){ s.effect = 'Deny'; }
-    else if(s.effect === 'Deny'){ s.effect = 'Allow'; }
-
-    document.querySelectorAll('.access-option').forEach(el => { const a = el.dataset.key === key; el.classList.toggle('active', a); el.querySelector('input').checked = a; });
-    document.getElementById('effectAllowBtn').classList.toggle('active', s.effect === 'Allow' && key !== 'none');
-    document.getElementById('effectDenyBtn').classList.toggle('active', s.effect === 'Deny' || key === 'none');
-    document.getElementById('effectAllowBtn').disabled = key === 'none';
-
+    const s = getActive();
+    if(!s) return;
+    s.accessMode = key;
+    document.querySelectorAll('.access-option').forEach(el => {
+      const active = el.dataset.key === key;
+      el.classList.toggle('active', active);
+      el.querySelector('input').checked = active;
+    });
     clearFieldError('sec-access', 'accessError');
     renderAccessEditor();
     updatePreview();
@@ -799,98 +1149,95 @@
   function renderAccessEditor(){
     const s = getActive();
     const host = document.getElementById('accessEditorHost');
-    const warnHost = document.getElementById('publicWarning');
-    host.innerHTML = ''; warnHost.innerHTML = '';
-    if(!s || !s.principalMode) return;
+    host.innerHTML = '';
+    if(!s || !s.accessMode || s.accessMode === 'no_one' || s.accessMode === 'everyone') return;
 
-    if(s.principalMode === 'specific' || s.principalMode === 'except'){
-      const label = s.principalMode === 'specific' ? 'IAM ARN' : 'Excluded IAM ARN';
-      const wrap = document.createElement('div');
-      wrap.className = 'access-editor fade-slide-enter';
-      wrap.innerHTML = `
-        <div class="chip-list" id="chipList">
-          ${s.principalArns.length ? s.principalArns.map((v,i) => chipHTML(v,i)).join('') : `<div class="text-body-secondary" style="font-size:0.82rem;">No ARNs added yet.</div>`}
-        </div>
-        <div class="input-group input-group-sm">
-          <input type="text" class="form-control mono" id="newListItem" placeholder="${ARN_HINT}">
-          <button class="btn btn-primary" type="button" id="addListItemBtn"><i class="mdi mdi-plus"></i> Add ${label}</button>
-        </div>
-        <div class="form-text-hint mt-1">Format: <code>arn:aws:iam::ACCOUNT_ID:role/RoleName</code>, <code>:user/UserName</code>, or <code>:root</code></div>
-      `;
-      host.appendChild(wrap);
-      document.getElementById('addListItemBtn').addEventListener('click', addListItemFromInput);
-      document.getElementById('newListItem').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addListItemFromInput(); } });
-    }
+    const cfg = LIST_CONFIG[s.accessMode];
+    const items = s.lists[s.accessMode];
 
-    if(s.principalMode === 'public' || s.principalMode === 'except'){
-      if(app.beginnerSafeMode){
-        warnHost.innerHTML = `
-          <div class="warn-banner">
-            <i class="mdi mdi-alert-outline"></i>
-            <div>
-              <strong>This makes objects publicly accessible.</strong> Anyone on the internet matching this rule can access the selected resources.
-              <label class="confirm-check">
-                <input type="checkbox" id="publicConfirm" ${s._publicConfirmed ? 'checked' : ''}>
-                I understand and want to allow this.
-              </label>
-            </div>
-          </div>`;
-        document.getElementById('publicConfirm').addEventListener('change', e => {
-          getActive()._publicConfirmed = e.target.checked;
-          clearFieldError('sec-access', 'accessError');
-          updatePreview();
-        });
-      }
-    }
+    const wrap = document.createElement('div');
+    wrap.className = 'access-editor fade-slide-enter';
+    wrap.innerHTML = `
+      <div class="chip-list" id="chipList-${s.accessMode}">
+        ${items.length ? items.map((val, i) => chipHTML(val, i)).join('') : `<div class="text-body-secondary" style="font-size:0.82rem;">No ${cfg.label.toLowerCase()}s added yet.</div>`}
+      </div>
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control" id="newListItem" placeholder="${cfg.placeholder}">
+        <button class="btn btn-primary" type="button" id="addListItemBtn"><i class="mdi mdi-plus"></i> Add ${cfg.label}</button>
+      </div>
+      <div class="form-text-hint mt-1">Examples: ${cfg.example}</div>
+    `;
+    host.appendChild(wrap);
+
+    document.getElementById('addListItemBtn').addEventListener('click', addListItemFromInput);
+    document.getElementById('newListItem').addEventListener('keydown', e => {
+      if(e.key === 'Enter'){ e.preventDefault(); addListItemFromInput(); }
+    });
   }
 
-  function chipHTML(val, i){ return `<span class="chip">${escapeHTML(val)}<button type="button" class="chip-remove" data-idx="${i}" aria-label="Remove ${escapeHTML(val)}"><i class="mdi mdi-close"></i></button></span>`; }
+  function chipHTML(val, i){
+    return `<span class="chip">${escapeHTML(val)}<button type="button" class="chip-remove" data-idx="${i}"><i class="mdi mdi-close"></i></button></span>`;
+  }
 
   function addListItemFromInput(){
     const s = getActive();
     const input = document.getElementById('newListItem');
     const val = input.value.trim();
     if(!val || !s) return;
-    s.principalArns.push(val);
+    s.lists[s.accessMode].push(val);
     input.value = '';
-    renderAccessEditor(); updatePreview();
+    renderAccessEditor();
+    updatePreview();
   }
 
   document.addEventListener('click', e => {
     const btn = e.target.closest('.chip-remove');
     if(!btn) return;
-    const s = getActive(); if(!s) return;
-    s.principalArns.splice(parseInt(btn.dataset.idx, 10), 1);
-    renderAccessEditor(); updatePreview();
+    const s = getActive();
+    if(!s) return;
+    // guided access-mode chips
+    if(s.accessMode && btn.closest('#accessEditorHost')){
+      const idx = parseInt(btn.dataset.idx, 10);
+      s.lists[s.accessMode].splice(idx, 1);
+      renderAccessEditor(); updatePreview(); return;
+    }
+    // custom principal chips
+    if(btn.closest('#cPrincipalEditorHost')){
+      const idx = parseInt(btn.dataset.idx, 10);
+      s.custom.principalArns.splice(idx, 1);
+      renderCustomPrincipalEditor(); updatePreview(); return;
+    }
   });
 
-  // =====================================================================
-  // RESOURCES
-  // =====================================================================
-  function addResource(){ const s = getActive(); if(!s) return; s.resources.push({ id: ++resourceUid, type:'file', path:'', recursive:false }); renderResources(); }
+  function addResource(){
+    const s = getActive();
+    if(!s) return;
+    s.resources.push({ id: ++resourceUid, type: 'file', path: '', recursive: false });
+    renderResources();
+  }
+
   function removeResource(id){
-    const s = getActive(); if(!s) return;
+    const s = getActive();
+    if(!s) return;
     s.resources = s.resources.filter(r => r.id !== id);
-    if(s.resources.length === 0) addResource(); else renderResources();
+    if(s.resources.length === 0) addResource();
+    else renderResources();
     updatePreview();
   }
-  function getResource(id){ const s = getActive(); return s ? s.resources.find(r => r.id === id) : null; }
 
   function renderResources(){
     const s = getActive();
     const host = document.getElementById('resourceList');
     if(!s || s.resources.length === 0){
-      host.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="mdi mdi-folder-open-outline"></i></div><div class="empty-state-title">No resources yet</div><div class="empty-state-desc">Add a file or folder path below.</div></div>`;
+      host.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="mdi mdi-folder-open-outline"></i></div>
+          <div class="empty-state-title">No resources yet</div>
+          <div class="empty-state-desc">Add a file or folder path below to define what this statement applies to.</div>
+        </div>`;
       return;
     }
-    const bucket = app.bucketName || 'your-bucket';
-    host.innerHTML = s.resources.map(r => {
-      let preview = r.path.trim();
-      if(preview){
-        if(r.recursive && !preview.endsWith('/*')) preview = preview.replace(/\/+$/,'') + '/*';
-        preview = `arn:aws:s3:::${bucket}/${preview.replace(/^\/+/,'')}`;
-      }
-      return `
+    host.innerHTML = s.resources.map(r => `
       <div class="resource-row" data-id="${r.id}">
         <div class="row g-2 align-items-center">
           <div class="col-md-3 col-6">
@@ -909,215 +1256,627 @@
             </div>
           </div>
           <div class="col-md-1 col-4 text-end">
-            <button type="button" class="btn btn-sm btn-outline-danger res-delete" title="Remove" aria-label="Remove resource"><i class="mdi mdi-trash-can-outline"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-danger res-delete" title="Remove"><i class="mdi mdi-trash-can-outline"></i></button>
           </div>
         </div>
-        ${preview ? `<div class="resource-example mono">${escapeHTML(preview)}</div>` : `<div class="resource-example"><i class="mdi mdi-information-outline"></i> Recursive appends <code>/*</code> automatically.</div>`}
-      </div>`;
-    }).join('');
+        <div class="resource-example"><i class="mdi mdi-information-outline"></i> Recursive appends <code>/*</code> to the path automatically.</div>
+      </div>
+    `).join('');
 
     host.querySelectorAll('.resource-row').forEach(row => {
       const id = parseInt(row.dataset.id, 10);
-      row.querySelector('.res-type').addEventListener('change', e => { getResource(id).type = e.target.value; renderResources(); updatePreview(); });
-      row.querySelector('.res-path').addEventListener('input', e => { getResource(id).path = e.target.value; clearFieldError('sec-resources','resourceError'); renderResources(); updatePreview(); });
-      row.querySelector('.res-recursive').addEventListener('change', e => { getResource(id).recursive = e.target.checked; renderResources(); updatePreview(); });
+      row.querySelector('.res-type').addEventListener('change', e => { getResource(id).type = e.target.value; updatePreview(); });
+      row.querySelector('.res-path').addEventListener('input', e => {
+        getResource(id).path = e.target.value;
+        clearFieldError('sec-resources', 'resourceError');
+        updatePreview();
+      });
+      row.querySelector('.res-recursive').addEventListener('change', e => { getResource(id).recursive = e.target.checked; updatePreview(); });
       row.querySelector('.res-delete').addEventListener('click', () => removeResource(id));
     });
   }
 
+  function getResource(id){
+    const s = getActive();
+    return s ? s.resources.find(r => r.id === id) : null;
+  }
+
   // =====================================================================
-  // PREVIEW (form -> editor), only when in form-managed mode
+  // CUSTOM: EFFECT
+  // =====================================================================
+  function setCustomEffect(effect){
+    const s = getActive(); if(!s) return;
+    s.custom.effect = effect;
+    document.getElementById('cEffectAllow').classList.toggle('active', effect === 'Allow');
+    document.getElementById('cEffectDeny').classList.toggle('active', effect === 'Deny');
+    renderStatementStrip();
+    updatePreview();
+  }
+
+  // =====================================================================
+  // CUSTOM: PRINCIPAL
+  // =====================================================================
+  function renderCustomPrincipalOptions(){
+    const host = document.getElementById('cPrincipalOptions');
+    host.innerHTML = CUSTOM_PRINCIPAL_OPTIONS.map(opt => `
+      <label class="access-option c-principal-option" data-key="${opt.key}">
+        <input type="radio" name="cPrincipal" value="${opt.key}">
+        <span class="access-icon"><i class="mdi ${opt.icon}"></i></span>
+        <div>
+          <div class="access-option-title">${opt.title}</div>
+          <div class="access-option-desc">${opt.desc}</div>
+        </div>
+      </label>
+    `).join('');
+    host.querySelectorAll('.c-principal-option').forEach(el => {
+      el.addEventListener('click', () => selectCustomPrincipal(el.dataset.key));
+    });
+  }
+
+  function selectCustomPrincipal(key){
+    const s = getActive(); if(!s) return;
+    s.custom.principalType = key;
+    document.querySelectorAll('.c-principal-option').forEach(el => {
+      const active = el.dataset.key === key;
+      el.classList.toggle('active', active);
+      el.querySelector('input').checked = active;
+    });
+    clearFieldError('sec-cPrincipal', 'cPrincipalError');
+    renderCustomPrincipalEditor();
+    updatePreview();
+  }
+
+  function renderCustomPrincipalEditor(){
+    const s = getActive();
+    const host = document.getElementById('cPrincipalEditorHost');
+    host.innerHTML = '';
+    if(!s || s.custom.principalType === 'everyone' || !s.custom.principalType) return;
+
+    const isRole = s.custom.principalType === 'role';
+    const placeholder = isRole ? 'arn:aws:iam::123456789012:role/MyRole' : 'arn:aws:iam::123456789012:user/jane.doe';
+    const label = isRole ? 'Role ARN' : 'User ARN';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'access-editor fade-slide-enter';
+    wrap.innerHTML = `
+      <div class="chip-list" id="cPrincipalChips">
+        ${s.custom.principalArns.length ? s.custom.principalArns.map((v,i) => chipHTML(v,i)).join('') : `<div class="text-body-secondary" style="font-size:0.82rem;">No ARNs added yet.</div>`}
+      </div>
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control mono" id="newCPrincipal" placeholder="${placeholder}">
+        <button class="btn btn-primary" type="button" id="addCPrincipalBtn"><i class="mdi mdi-plus"></i> Add ${label}</button>
+      </div>
+      <div class="form-text-hint mt-1">Format: <code>arn:aws:iam::ACCOUNT_ID:${isRole ? 'role' : 'user'}/Name</code></div>
+    `;
+    host.appendChild(wrap);
+    document.getElementById('addCPrincipalBtn').addEventListener('click', addCustomPrincipal);
+    document.getElementById('newCPrincipal').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addCustomPrincipal(); } });
+  }
+
+  function addCustomPrincipal(){
+    const s = getActive();
+    const input = document.getElementById('newCPrincipal');
+    const val = input.value.trim();
+    if(!val || !s) return;
+    s.custom.principalArns.push(val);
+    input.value = '';
+    renderCustomPrincipalEditor();
+    updatePreview();
+  }
+
+  // =====================================================================
+  // CUSTOM: ACTION
+  // =====================================================================
+  function renderCustomActionGrid(){
+    const grid = document.getElementById('cActionGrid');
+    grid.innerHTML = CUSTOM_ACTIONS.map((action, i) => `
+      <div class="col-md-6">
+        <div class="adv-check">
+          <input type="checkbox" value="${action}" id="cact-${i}">
+          <label class="mono" for="cact-${i}" style="font-size:0.8rem;">${action}</label>
+        </div>
+      </div>
+    `).join('');
+    grid.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const s = getActive(); if(!s) return;
+        if(cb.checked) s.custom.actions.add(cb.value);
+        else s.custom.actions.delete(cb.value);
+        clearFieldError('sec-cAction', 'cActionError');
+        updatePreview();
+      });
+    });
+  }
+
+  // =====================================================================
+  // CUSTOM: RESOURCE
+  // =====================================================================
+  function addCustomResource(){
+    const s = getActive(); if(!s) return;
+    s.custom.resources.push({ id: ++resourceUid, path: '', recursive: false, bucketOnly:false });
+    renderCustomResources();
+  }
+  function removeCustomResource(id){
+    const s = getActive(); if(!s) return;
+    s.custom.resources = s.custom.resources.filter(r => r.id !== id);
+    if(s.custom.resources.length === 0) addCustomResource();
+    else renderCustomResources();
+    updatePreview();
+  }
+  function getCustomResource(id){
+    const s = getActive();
+    return s ? s.custom.resources.find(r => r.id === id) : null;
+  }
+
+  function customResourceArn(bucket, r){
+    const b = bucket || '{Bucket Name}';
+    if(r.bucketOnly) return `arn:aws:s3:::${b}`;
+    let path = (r.path || '').trim().replace(/^\/+/, '');
+    if(r.recursive && !path.endsWith('*')) path = path.endsWith('/') ? path + '*' : path + '/*';
+    return `arn:aws:s3:::${b}/${path || '*'}`;
+  }
+
+  function renderCustomResources(){
+    const s = getActive();
+    const host = document.getElementById('cResourceList');
+    if(!s || s.custom.resources.length === 0){
+      host.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="mdi mdi-folder-open-outline"></i></div><div class="empty-state-title">No resources yet</div><div class="empty-state-desc">Add a resource path — use <code>*</code> for everything in the bucket.</div></div>`;
+      return;
+    }
+    host.innerHTML = s.custom.resources.map(r => `
+      <div class="resource-row" data-id="${r.id}">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-1 col-3">
+            <div class="form-check pt-2" title="Whole bucket ARN (for actions like ListBucket)">
+              <input class="form-check-input res-bucket-only" type="checkbox" ${r.bucketOnly?'checked':''} id="bo-${r.id}">
+              <label class="form-check-label" for="bo-${r.id}" style="font-size:0.72rem;">Bucket</label>
+            </div>
+          </div>
+          <div class="col-md-6 col-9">
+            <input type="text" class="form-control form-control-sm res-path mono" placeholder="e.g. * or public/logo.png" value="${escapeHTML(r.path)}" ${r.bucketOnly ? 'disabled' : ''}>
+          </div>
+          <div class="col-md-3 col-8">
+            <div class="form-check">
+              <input class="form-check-input res-recursive" type="checkbox" ${r.recursive?'checked':''} id="crec-${r.id}" ${r.bucketOnly ? 'disabled' : ''}>
+              <label class="form-check-label" for="crec-${r.id}" style="font-size:0.8rem;">Recursive</label>
+            </div>
+          </div>
+          <div class="col-md-2 col-4 text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger res-delete" title="Remove"><i class="mdi mdi-trash-can-outline"></i></button>
+          </div>
+        </div>
+        <div class="arn-preview">${escapeHTML(customResourceArn(app.bucketName, r))}</div>
+      </div>
+    `).join('');
+
+    host.querySelectorAll('.resource-row').forEach(row => {
+      const id = parseInt(row.dataset.id, 10);
+      row.querySelector('.res-path').addEventListener('input', e => {
+        getCustomResource(id).path = e.target.value;
+        clearFieldError('sec-cResource', 'cResourceError');
+        renderCustomResources(); updatePreview();
+      });
+      row.querySelector('.res-recursive').addEventListener('change', e => { getCustomResource(id).recursive = e.target.checked; renderCustomResources(); updatePreview(); });
+      row.querySelector('.res-bucket-only').addEventListener('change', e => { getCustomResource(id).bucketOnly = e.target.checked; renderCustomResources(); updatePreview(); });
+      row.querySelector('.res-delete').addEventListener('click', () => removeCustomResource(id));
+    });
+  }
+
+  // =====================================================================
+  // CUSTOM: CONDITION
+  // =====================================================================
+  function addCustomCondition(){
+    const s = getActive(); if(!s) return;
+    s.custom.conditions.push({ id: ++condUid, operator: 'StringEquals', key: '', value: '' });
+    renderCustomConditions();
+  }
+  function removeCustomCondition(id){
+    const s = getActive(); if(!s) return;
+    s.custom.conditions = s.custom.conditions.filter(c => c.id !== id);
+    renderCustomConditions();
+    updatePreview();
+  }
+  function getCustomCondition(id){
+    const s = getActive();
+    return s ? s.custom.conditions.find(c => c.id === id) : null;
+  }
+
+  function renderCustomConditions(){
+    const s = getActive();
+    const host = document.getElementById('cConditionList');
+    if(!s || s.custom.conditions.length === 0){
+      host.innerHTML = `<div class="empty-state mb-3"><div class="empty-state-icon"><i class="mdi mdi-shield-off-outline"></i></div><div class="empty-state-title">No conditions</div><div class="empty-state-desc">This statement applies unconditionally. Add a condition to restrict it further.</div></div>`;
+      return;
+    }
+    host.innerHTML = s.custom.conditions.map(c => `
+      <div class="condition-row" data-id="${c.id}">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-3 col-12">
+            <select class="form-select form-select-sm cond-operator">
+              ${CONDITION_OPERATORS.map(op => `<option value="${op}" ${c.operator===op?'selected':''}>${op}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-4 col-6">
+            <input type="text" class="form-control form-control-sm cond-key mono" placeholder="${CONDITION_KEY_HINTS[c.operator] || 'condition key'}" value="${escapeHTML(c.key)}">
+          </div>
+          <div class="col-md-4 col-5">
+            <input type="text" class="form-control form-control-sm cond-value mono" placeholder="value (comma-separated for lists)" value="${escapeHTML(c.value)}">
+          </div>
+          <div class="col-md-1 col-1 text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger cond-delete" title="Remove"><i class="mdi mdi-trash-can-outline"></i></button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    host.querySelectorAll('.condition-row').forEach(row => {
+      const id = parseInt(row.dataset.id, 10);
+      row.querySelector('.cond-operator').addEventListener('change', e => { getCustomCondition(id).operator = e.target.value; renderCustomConditions(); updatePreview(); });
+      row.querySelector('.cond-key').addEventListener('input', e => { getCustomCondition(id).key = e.target.value; updatePreview(); });
+      row.querySelector('.cond-value').addEventListener('input', e => { getCustomCondition(id).value = e.target.value; updatePreview(); });
+      row.querySelector('.cond-delete').addEventListener('click', () => removeCustomCondition(id));
+    });
+  }
+
+  // =====================================================================
+  // BUILDERS -> JSON
+  // =====================================================================
+  function buildPrincipalBlock(s){
+    switch(s.accessMode){
+      case 'no_one':    return { key: 'Principal', value: {} };
+      case 'everyone':  return { key: 'Principal', value: '*' };
+      case 'department':return { key: 'Principal', value: { Department: [...s.lists.department] } };
+      case 'domain':    return { key: 'Principal', value: { Domain: [...s.lists.domain] } };
+      case 'share':     return { key: 'Principal', value: { Users: [...s.lists.share] } };
+      case 'except':    return { key: 'NotPrincipal', value: { Users: [...s.lists.except] } };
+      default:          return { key: 'Principal', value: {} };
+    }
+  }
+
+  function buildActions(s){
+    if(s.profile === 'advanced') return [...s.advancedActions];
+    const p = PERMISSION_PROFILES.find(p => p.key === s.profile);
+    return p ? [...p.actions] : [];
+  }
+
+  function buildResourceArray(s){
+    return s.resources
+      .filter(r => r.path && r.path.trim() !== '')
+      .map(r => {
+        let path = r.path.trim();
+        if(r.recursive && !path.endsWith('/*')){
+          path = path.endsWith('/') ? path + '*' : path + '/*';
+        }
+        return path;
+      });
+  }
+
+  function buildGuidedStatementObject(s){
+    const principalBlock = buildPrincipalBlock(s);
+    return {
+      Sid: s.sid || 'Statement1',
+      [principalBlock.key]: principalBlock.value,
+      Effect: 'Allow',
+      Action: buildActions(s),
+      Resource: buildResourceArray(s)
+    };
+  }
+
+  function buildCustomPrincipal(s){
+    if(s.custom.principalType === 'everyone' || !s.custom.principalType) return '*';
+    return { AWS: [...s.custom.principalArns] };
+  }
+
+  function buildCustomResourceArray(s){
+    return s.custom.resources
+      .filter(r => r.bucketOnly || (r.path && r.path.trim() !== ''))
+      .map(r => customResourceArn(app.bucketName, r));
+  }
+
+  function buildCustomCondition(s){
+    const cond = {};
+    s.custom.conditions.forEach(c => {
+      if(!c.key || !c.operator) return;
+      const values = c.value.split(',').map(v => v.trim()).filter(Boolean);
+      if(values.length === 0) return;
+      cond[c.operator] = cond[c.operator] || {};
+      cond[c.operator][c.key] = values.length === 1 ? values[0] : values;
+    });
+    return cond;
+  }
+
+  function buildCustomStatementObject(s){
+    const statement = {
+      Sid: s.sid || 'Statement1',
+      Effect: s.custom.effect,
+      Principal: buildCustomPrincipal(s),
+      Action: [...s.custom.actions],
+      Resource: buildCustomResourceArray(s)
+    };
+    const condition = buildCustomCondition(s);
+    if(Object.keys(condition).length) statement.Condition = condition;
+    return statement;
+  }
+
+  function buildStatementObject(s){
+    return s.mode === 'custom' ? buildCustomStatementObject(s) : buildGuidedStatementObject(s);
+  }
+
+  function generatePolicyObject(){
+    return {
+      Version: app.version,
+      Statement: app.statements.map(buildStatementObject)
+    };
+  }
+
+  // =====================================================================
+  // PREVIEW
   // =====================================================================
   function updatePreview(){
-    if(suppressEditorSync || app.editorMode === 'raw') { updateMeta(); return; }
+    if(suppressEditorSync) return;
     const policy = generatePolicyObject();
-    document.getElementById('jsonEditor').value = JSON.stringify(policy, null, 2);
-    setEditorStatus('ok', `${app.statements.length} statement${app.statements.length===1?'':'s'} · synced from form`);
+    const pretty = JSON.stringify(policy, null, 2);
+    document.getElementById('jsonEditor').value = pretty;
+    setEditorStatus(true, `${app.statements.length} statement${app.statements.length===1?'':'s'} · synced from form`);
     updateMeta();
   }
-  function updateMeta(){ document.getElementById('editorMeta').textContent = `${app.statements.length} statement${app.statements.length===1?'':'s'}`; }
 
-  function setEditorStatus(kind, msg){
+  function updateMeta(){
+    document.getElementById('editorMeta').textContent = `${app.statements.length} statement${app.statements.length===1?'':'s'}`;
+  }
+
+  function setEditorStatus(ok, msg){
     const el = document.getElementById('editorStatus');
     const badge = document.getElementById('statusBadge');
-    const icon = kind === 'ok' ? 'mdi-check-circle-outline editor-status-ok' : kind === 'warn' ? 'mdi-alert-outline editor-status-warn' : 'mdi-alert-circle-outline editor-status-err';
-    el.innerHTML = `<i class="mdi ${icon}"></i> ${msg}`;
-    if(kind === 'ok'){ badge.innerHTML = `<i class="mdi mdi-circle-medium"></i> Live`; badge.style.background='var(--accent-soft)'; badge.style.color='var(--accent-dark)'; }
-    else if(kind === 'warn'){ badge.innerHTML = `<i class="mdi mdi-pencil"></i> Raw mode`; badge.style.background='var(--warn-soft)'; badge.style.color='var(--warn)'; }
-    else { badge.innerHTML = `<i class="mdi mdi-alert"></i> Invalid`; badge.style.background='var(--danger-soft)'; badge.style.color='var(--danger)'; }
+    if(ok){
+      el.innerHTML = `<i class="mdi mdi-check-circle-outline editor-status-ok"></i> ${msg}`;
+      badge.innerHTML = `<i class="mdi mdi-circle-medium"></i> Live`;
+      badge.style.background = 'var(--accent-soft)'; badge.style.color = 'var(--accent-dark)';
+    } else {
+      el.innerHTML = `<i class="mdi mdi-alert-circle-outline editor-status-err"></i> ${msg}`;
+      badge.innerHTML = `<i class="mdi mdi-alert"></i> Invalid`;
+      badge.style.background = 'var(--danger-soft)'; badge.style.color = 'var(--danger)';
+    }
   }
 
   // =====================================================================
-  // RAW JSON -> STATE (only used when switching back to Form-managed)
+  // EDITOR -> STATE (raw JSON round-trip; rehydrates into Guided fields —
+  // if you hand-write Custom-only shapes like Condition blocks, switch that
+  // statement to Custom Form afterwards to keep editing it visually)
   // =====================================================================
   let editorDebounce = null;
   function onEditorInput(){
-    if(app.editorMode !== 'raw'){ return; } // form-managed: textarea is read/display only via form
     clearTimeout(editorDebounce);
-    editorDebounce = setTimeout(() => {
-      try{
-        JSON.parse(document.getElementById('jsonEditor').value);
-        setEditorStatus('warn', 'Raw JSON mode — valid JSON, not synced to the form.');
-      } catch(e){
-        setEditorStatus('err', 'Raw JSON mode — invalid JSON syntax.');
-      }
-    }, 300);
+    editorDebounce = setTimeout(rehydrateFromEditor, 350);
   }
 
-  function rehydrateFromEditorIntoForm(){
+  function rehydrateFromEditor(){
     const raw = document.getElementById('jsonEditor').value;
     let parsed;
-    try{ parsed = JSON.parse(raw); } catch(e){ setEditorStatus('err', 'Cannot switch to Form-managed — fix the JSON syntax first.'); return false; }
-    if(!parsed || !Array.isArray(parsed.Statement)){ setEditorStatus('err', 'JSON must contain a "Statement" array.'); return false; }
+    try{ parsed = JSON.parse(raw); }
+    catch(err){ setEditorStatus(false, 'Invalid JSON — fix the syntax to sync back to the form.'); return; }
+    if(!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.Statement)){
+      setEditorStatus(false, 'JSON must contain a "Statement" array.');
+      return;
+    }
 
     suppressEditorSync = true;
-    if(typeof parsed.Version === 'string') document.getElementById('policyVersion').value = parsed.Version;
+    app.version = typeof parsed.Version === 'string' ? parsed.Version : app.version;
+    document.getElementById('policyVersion').value = app.version;
 
-    const prevIndex = Math.max(0, app.statements.findIndex(s => s.id === app.activeId));
-    app.statements = parsed.Statement
-      .filter(st => !/DenyInsecureTransport$/.test(st.Sid || '')) // companion statements get regenerated, not double-counted
-      .map(rehydrateStatement);
+    const previousActiveIndex = app.statements.findIndex(s => s.id === app.activeId);
+    app.statements = parsed.Statement.map(raw => rehydrateStatement(raw));
     if(app.statements.length === 0) app.statements.push(newStatement('Statement1'));
-    app.activeId = app.statements[Math.min(prevIndex, app.statements.length - 1)].id;
+
+    const nextIndex = Math.min(Math.max(previousActiveIndex, 0), app.statements.length - 1);
+    app.activeId = app.statements[nextIndex].id;
 
     renderStatementStrip();
     loadActiveIntoForm();
+
     suppressEditorSync = false;
-    return true;
+    setEditorStatus(true, `${app.statements.length} statement${app.statements.length===1?'':'s'} · parsed from editor`);
+    updateMeta();
   }
 
   function rehydrateStatement(raw){
     const s = newStatement(typeof raw.Sid === 'string' ? raw.Sid : undefined);
-    s.effect = raw.Effect === 'Deny' ? 'Deny' : 'Allow';
 
-    const actions = Array.isArray(raw.Action) ? raw.Action : (raw.Action ? [raw.Action] : []);
-    const matched = PERMISSION_PROFILES.find(p => p.key !== 'advanced' && p.actions.length === actions.length && p.actions.every(a => actions.includes(a)));
-    if(matched){ s.profile = matched.key; }
-    else if(actions.length){ s.profile = 'advanced'; actions.forEach(a => { if(ADVANCED_ACTIONS.includes(a)) s.advancedActions.add(a); }); }
+    // Detect real AWS-shaped statements (Resource looks like an ARN, or a Condition exists)
+    // and route them into Custom mode so nothing is silently lost.
+    const resArr = Array.isArray(raw.Resource) ? raw.Resource : (raw.Resource ? [raw.Resource] : []);
+    const looksLikeArn = resArr.some(r => typeof r === 'string' && r.startsWith('arn:aws:s3:::'));
+    const hasCondition = raw.Condition && typeof raw.Condition === 'object';
 
-    const principal = raw.Principal;
-    const condition = raw.Condition && typeof raw.Condition === 'object' ? { ...raw.Condition } : null;
+    if(looksLikeArn || hasCondition || raw.Effect === 'Deny'){
+      s.mode = 'custom';
+      s.custom.effect = raw.Effect === 'Deny' ? 'Deny' : 'Allow';
 
-    if(s.effect === 'Deny' && principal === '*' && !condition){
-      s.principalMode = 'none';
-    } else if(principal === '*' && condition && condition.StringNotEquals && condition.StringNotEquals['aws:PrincipalArn']){
-      s.principalMode = 'except';
-      s.principalArns = [...condition.StringNotEquals['aws:PrincipalArn']];
-      delete condition.StringNotEquals;
-      if(Object.keys(condition).length) s.rawCondition = condition;
-    } else if(principal === '*'){
-      s.principalMode = 'public'; s._publicConfirmed = true; s.rawCondition = condition;
-    } else if(principal && typeof principal === 'object' && Array.isArray(principal.AWS)){
-      s.principalMode = 'specific'; s.principalArns = [...principal.AWS]; s.rawCondition = condition;
-    } else {
-      s.principalMode = 'none'; s.rawCondition = condition;
+      const actions = Array.isArray(raw.Action) ? raw.Action : (raw.Action ? [raw.Action] : []);
+      actions.forEach(a => s.custom.actions.add(a));
+
+      if(raw.Principal === '*'){ s.custom.principalType = 'everyone'; }
+      else if(raw.Principal && typeof raw.Principal === 'object' && Array.isArray(raw.Principal.AWS)){
+        const arns = raw.Principal.AWS;
+        s.custom.principalType = arns.some(a => a.includes(':role/')) ? 'role' : 'people';
+        s.custom.principalArns = [...arns];
+      } else { s.custom.principalType = 'everyone'; }
+
+      if(resArr.length){
+        s.custom.resources = resArr.map(full => {
+          const withoutBucket = full.replace(/^arn:aws:s3:::[^/]+/, '');
+          if(withoutBucket === ''){ return { id: ++resourceUid, path:'', recursive:false, bucketOnly:true }; }
+          let path = withoutBucket.replace(/^\//, '');
+          let recursive = false;
+          if(path.endsWith('/*')){ recursive = true; path = path.slice(0, -2); }
+          return { id: ++resourceUid, path, recursive, bucketOnly:false };
+        });
+      }
+
+      if(hasCondition){
+        Object.entries(raw.Condition).forEach(([operator, kv]) => {
+          Object.entries(kv).forEach(([key, value]) => {
+            const val = Array.isArray(value) ? value.join(', ') : String(value);
+            s.custom.conditions.push({ id: ++condUid, operator, key, value: val });
+          });
+        });
+      }
+      return s;
     }
 
-    const resArr = Array.isArray(raw.Resource) ? raw.Resource : (raw.Resource ? [raw.Resource] : []);
-    const objectPaths = resArr.filter(r => r.includes('/')).map(r => r.split('/').slice(1).join('/'));
-    if(objectPaths.length){
-      s.resources = objectPaths.map(p => {
-        let recursive = false, clean = p;
+    // Otherwise, treat as a Guided-mode statement (legacy s3files:* shape)
+    const actions = Array.isArray(raw.Action) ? raw.Action : (raw.Action ? [raw.Action] : []);
+    const matchedProfile = PERMISSION_PROFILES.find(p =>
+      p.key !== 'advanced' && p.actions.length === actions.length && p.actions.every(a => actions.includes(a))
+    );
+    if(matchedProfile){ s.profile = matchedProfile.key; }
+    else if(actions.length){ s.profile = 'advanced'; actions.forEach(a => { if(ADVANCED_ACTIONS.includes(a)) s.advancedActions.add(a); }); }
+    else { s.profile = null; }
+
+    if(raw.NotPrincipal && typeof raw.NotPrincipal === 'object'){
+      s.accessMode = 'except';
+      s.lists.except = Array.isArray(raw.NotPrincipal.Users) ? [...raw.NotPrincipal.Users] : [];
+    } else if(raw.Principal === '*'){
+      s.accessMode = 'everyone';
+    } else if(raw.Principal && typeof raw.Principal === 'object'){
+      if(Array.isArray(raw.Principal.Department)){ s.accessMode = 'department'; s.lists.department = [...raw.Principal.Department]; }
+      else if(Array.isArray(raw.Principal.Domain)){ s.accessMode = 'domain'; s.lists.domain = [...raw.Principal.Domain]; }
+      else if(Array.isArray(raw.Principal.Users)){ s.accessMode = 'share'; s.lists.share = [...raw.Principal.Users]; }
+      else { s.accessMode = 'no_one'; }
+    } else { s.accessMode = 'no_one'; }
+
+    if(resArr.length){
+      s.resources = resArr.map(path => {
+        let recursive = false;
+        let clean = String(path);
         if(clean.endsWith('/*')){ recursive = true; clean = clean.slice(0, -2); }
-        return { id: ++resourceUid, type: recursive ? 'folder' : 'file', path: clean, recursive };
+        const type = clean.endsWith('/') || recursive ? 'folder' : 'file';
+        return { id: ++resourceUid, type, path: clean, recursive };
       });
     }
     return s;
   }
 
   // =====================================================================
-  // EDITOR MODE SWITCH
+  // VALIDATION
   // =====================================================================
-  function setEditorMode(mode){
-    if(mode === app.editorMode) return;
-    if(mode === 'form'){
-      const ok = rehydrateFromEditorIntoForm();
-      if(!ok) return; // stay in raw mode until JSON is fixed
-      app.editorMode = 'form';
-      document.getElementById('jsonEditor').removeAttribute('readonly');
-      updatePreview();
-    } else {
-      app.editorMode = 'raw';
-      setEditorStatus('warn', 'Raw JSON mode — your edits will not be overwritten.');
-    }
-    document.getElementById('modeFormBtn').classList.toggle('active', app.editorMode === 'form');
-    document.getElementById('modeRawBtn').classList.toggle('active', app.editorMode === 'raw');
-  }
-
-  // =====================================================================
-  // VALIDATION (wired to UI)
-  // =====================================================================
-  function setFieldError(sectionId, errorId, invalid, msg){
+  function setFieldError(sectionId, errorId, invalid){
     const section = document.getElementById(sectionId);
     const err = document.getElementById(errorId);
     section.classList.toggle('is-invalid-block', invalid);
-    if(err){ err.style.display = invalid ? 'flex' : 'none'; if(invalid && msg) err.innerHTML = `<i class="mdi mdi-alert-circle"></i> ${msg}`; }
+    if(err) err.style.display = invalid ? 'flex' : 'none';
   }
   function clearFieldError(sectionId, errorId){ setFieldError(sectionId, errorId, false); }
   function clearAllErrors(){
-    ['sec-info','sec-profile','sec-advanced','sec-access','sec-resources'].forEach(id => document.getElementById(id).classList.remove('is-invalid-block'));
+    ['sec-info','sec-profile','sec-advanced','sec-access','sec-resources','sec-cPrincipal','sec-cAction','sec-cResource'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.remove('is-invalid-block');
+    });
     document.querySelectorAll('.invalid-msg').forEach(m => m.style.display = 'none');
     document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    const host = document.getElementById('accessEditorHost');
+    if(host) host.classList.remove('is-invalid-block');
   }
 
-  function validateActiveForm(){
-    clearAllErrors();
+  function validateForm(){
+    let valid = true;
     const s = getActive();
-    const bucketName = document.getElementById('bucketName').value.trim();
-    const errs = validateStatement(s, bucketName);
 
-    const bucketInput = document.getElementById('bucketName');
-    bucketInput.classList.toggle('is-invalid', errs.some(e => e.field === 'bucketName'));
-    if(errs.some(e => e.field === 'bucketName')) document.getElementById('sec-info').classList.add('is-invalid-block');
+    const version = document.getElementById('policyVersion');
+    const sid = document.getElementById('statementId');
+    toggleInputInvalid(version, version.value.trim() === '');
+    toggleInputInvalid(sid, sid.value.trim() === '');
+    if(version.value.trim() === '' || sid.value.trim() === '') valid = false;
 
-    const byField = key => errs.find(e => e.field === key);
-    if(byField('profile')) setFieldError('sec-profile','profileError', true, byField('profile').message);
-    if(byField('advanced')) setFieldError('sec-advanced','advancedError', true, byField('advanced').message);
-    if(byField('access')) setFieldError('sec-access','accessError', true, byField('access').message);
-    if(byField('resources')) setFieldError('sec-resources','resourceError', true, byField('resources').message);
+    if(s && s.mode === 'custom'){
+      const bucketInput = document.getElementById('bucketNameGlobal');
+      toggleInputInvalid(bucketInput, !app.bucketName);
+      if(!app.bucketName) valid = false;
 
-    return errs;
+      if(!s.custom.principalType){ setFieldError('sec-cPrincipal','cPrincipalError', true); valid = false; }
+      else clearFieldError('sec-cPrincipal','cPrincipalError');
+      if((s.custom.principalType === 'role' || s.custom.principalType === 'people') && s.custom.principalArns.length === 0){
+        setFieldError('sec-cPrincipal','cPrincipalError', true); valid = false;
+      }
+
+      if(s.custom.actions.size === 0){ setFieldError('sec-cAction','cActionError', true); valid = false; }
+      else clearFieldError('sec-cAction','cActionError');
+
+      if(buildCustomResourceArray(s).length === 0){ setFieldError('sec-cResource','cResourceError', true); valid = false; }
+      else clearFieldError('sec-cResource','cResourceError');
+
+      return valid;
+    }
+
+    if(!s || !s.profile){ setFieldError('sec-profile', 'profileError', true); valid = false; }
+    else clearFieldError('sec-profile', 'profileError');
+
+    if(s && s.profile === 'advanced' && s.advancedActions.size === 0){ setFieldError('sec-advanced', 'advancedError', true); valid = false; }
+    else clearFieldError('sec-advanced', 'advancedError');
+
+    if(!s || !s.accessMode){ setFieldError('sec-access', 'accessError', true); valid = false; }
+    else {
+      clearFieldError('sec-access', 'accessError');
+      if(['department','domain','share','except'].includes(s.accessMode)){
+        const host = document.getElementById('accessEditorHost');
+        if(s.lists[s.accessMode].length === 0){ valid = false; host.classList.add('is-invalid-block'); }
+        else host.classList.remove('is-invalid-block');
+      }
+    }
+
+    const hasResource = s ? buildResourceArray(s).length > 0 : false;
+    setFieldError('sec-resources', 'resourceError', !hasResource);
+    if(!hasResource) valid = false;
+
+    return valid;
   }
+
+  function toggleInputInvalid(el, invalid){ el.classList.toggle('is-invalid', invalid); }
 
   // =====================================================================
-  // CLIPBOARD / DOWNLOAD — validate before acting
+  // CLIPBOARD / DOWNLOAD
   // =====================================================================
   function copyJSON(){
     const text = document.getElementById('jsonEditor').value;
-    try{
-      JSON.parse(text);
-    } catch(e){
-      showToast('Not copied — the JSON is invalid.');
-      return;
-    }
+    try{ JSON.parse(text); } catch(e){ showToast('Not copied — the JSON is invalid.'); return; }
     navigator.clipboard.writeText(text).then(() => showToast('Valid JSON copied to clipboard.')).catch(() => showToast('Could not copy — please copy manually.'));
   }
+
   function downloadJSON(){
     const text = document.getElementById('jsonEditor').value;
     try{ JSON.parse(text); } catch(e){ showToast('Not downloaded — the JSON is invalid.'); return; }
     const blob = new Blob([text], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'bucket-policy.json';
+    const a = document.createElement('a');
+    a.href = url; a.download = 'bucket-policy.json';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
     showToast('bucket-policy.json downloaded.');
   }
+
   function showToast(msg){
     document.getElementById('toastBody').textContent = msg;
-    bootstrap.Toast.getOrCreateInstance(document.getElementById('liveToast'), { delay: 2400 }).show();
+    const toastEl = document.getElementById('liveToast');
+    const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2400 });
+    toast.show();
   }
 
   // =====================================================================
   // CLEAR / GENERATE
   // =====================================================================
   function clearForm(){
-    app.bucketName = ''; document.getElementById('bucketName').value = '';
-    app.editorMode = 'form';
-    document.getElementById('modeFormBtn').classList.add('active');
-    document.getElementById('modeRawBtn').classList.remove('active');
+    app.version = '2012-10-17';
+    app.bucketName = '';
+    document.getElementById('bucketNameGlobal').value = '';
     app.statements = [ newStatement('Statement1') ];
     app.activeId = app.statements[0].id;
-    renderStatementStrip(); loadActiveIntoForm(); updatePreview();
+    resourceUid = 0; condUid = 0;
+    app.statements[0].resources = [ { id: ++resourceUid, type:'file', path:'', recursive:false } ];
+    app.statements[0].custom.resources = [ { id: ++resourceUid, path:'', recursive:false, bucketOnly:false } ];
+
+    renderStatementStrip();
+    loadActiveIntoForm();
+    updatePreview();
     showToast('Form cleared.');
   }
 
@@ -1125,84 +1884,93 @@
     const btn = document.getElementById('btnGenerate');
     const label = document.getElementById('genLabel');
     const original = label.innerHTML;
-    btn.disabled = true; label.innerHTML = `<span class="btn-spinner"></span> Generating...`;
+    btn.disabled = true;
+    label.innerHTML = `<span class="btn-spinner"></span> Generating...`;
 
     setTimeout(() => {
-      const errs = validateActiveForm();
+      const ok = validateForm();
       updatePreview();
-      btn.disabled = false; label.innerHTML = original;
-      if(errs.length === 0){
-        setEditorStatus('ok', 'Policy generated successfully.');
+      btn.disabled = false;
+      label.innerHTML = original;
+
+      if(ok){
+        setEditorStatus(true, 'Policy generated successfully.');
         showToast('Policy generated successfully.');
       } else {
-        setEditorStatus('err', errs[0].message);
-        showToast(errs[0].message);
+        setEditorStatus(false, 'Some fields need attention.');
         const firstInvalid = document.querySelector('.is-invalid-block, .is-invalid');
         if(firstInvalid) firstInvalid.scrollIntoView({ behavior:'smooth', block:'center' });
       }
-    }, 350);
+    }, 400);
   }
 
   // =====================================================================
-  // COLLAPSIBLE SECTIONS (keyboard accessible)
+  // COLLAPSIBLE SECTIONS
   // =====================================================================
   function bindCollapse(){
     document.querySelectorAll('.section-head').forEach(head => {
-      head.addEventListener('click', () => toggleSection(head));
+      head.addEventListener('click', () => {
+        const body = document.getElementById(head.dataset.target);
+        const chevron = head.querySelector('.section-chevron');
+        const collapsed = body.style.display === 'none';
+        body.style.display = collapsed ? '' : 'none';
+        chevron.classList.toggle('collapsed', !collapsed);
+      });
     });
-  }
-  function toggleSection(head){
-    const body = document.getElementById(head.dataset.target);
-    const chevron = head.querySelector('.section-chevron');
-    const collapsed = body.style.display === 'none';
-    body.style.display = collapsed ? '' : 'none';
-    chevron.classList.toggle('collapsed', !collapsed);
-    head.setAttribute('aria-expanded', String(collapsed));
   }
 
   // =====================================================================
   // GLOBAL EVENTS
   // =====================================================================
   function bindGlobalEvents(){
-    document.getElementById('bucketName').addEventListener('input', e => {
+    document.getElementById('bucketNameGlobal').addEventListener('input', e => {
       app.bucketName = e.target.value.trim();
       e.target.classList.remove('is-invalid');
-      renderResources(); updatePreview();
+      renderCustomResources();
+      updatePreview();
     });
-    document.getElementById('policyVersion').addEventListener('input', updatePreview);
+    document.getElementById('policyVersion').addEventListener('input', e => {
+      app.version = e.target.value;
+      toggleInputInvalid(e.target, false);
+      updatePreview();
+    });
     document.getElementById('statementId').addEventListener('input', e => {
-      const s = getActive(); if(s) s.sid = e.target.value;
-      renderStatementStrip(); updatePreview();
-    });
-    document.getElementById('safeMode').addEventListener('change', e => {
-      app.beginnerSafeMode = e.target.checked;
-      renderAccessEditor(); updatePreview();
-    });
-
-    document.getElementById('effectAllowBtn').addEventListener('click', () => setEffect('Allow'));
-    document.getElementById('effectDenyBtn').addEventListener('click', () => setEffect('Deny'));
-    document.getElementById('requireHttps').addEventListener('change', e => {
-      const s = getActive(); if(s) s.requireHttps = e.target.checked;
+      const s = getActive();
+      if(s) s.sid = e.target.value;
+      toggleInputInvalid(e.target, false);
+      renderStatementStrip();
       updatePreview();
     });
 
+    document.getElementById('modeGuidedBtn').addEventListener('click', () => setStatementMode('guided'));
+    document.getElementById('modeCustomBtn').addEventListener('click', () => setStatementMode('custom'));
+
+    document.getElementById('cEffectAllow').addEventListener('click', () => setCustomEffect('Allow'));
+    document.getElementById('cEffectDeny').addEventListener('click', () => setCustomEffect('Deny'));
+
     document.getElementById('btnAddResource').addEventListener('click', () => { addResource(); updatePreview(); });
+    document.getElementById('btnAddCResource').addEventListener('click', () => { addCustomResource(); updatePreview(); });
+    document.getElementById('btnAddCCondition').addEventListener('click', () => { addCustomCondition(); updatePreview(); });
+
     document.getElementById('btnGenerate').addEventListener('click', generateWithValidation);
     document.getElementById('btnCopy').addEventListener('click', copyJSON);
     document.getElementById('btnDownload').addEventListener('click', downloadJSON);
     document.getElementById('btnFormat').addEventListener('click', () => {
       const editor = document.getElementById('jsonEditor');
-      try{ editor.value = JSON.stringify(JSON.parse(editor.value), null, 2); showToast('JSON formatted.'); }
-      catch(e){ showToast('Cannot format — invalid JSON.'); }
+      try{
+        const parsed = JSON.parse(editor.value);
+        editor.value = JSON.stringify(parsed, null, 2);
+        showToast('JSON formatted.');
+      } catch(e){ showToast('Cannot format — invalid JSON.'); }
     });
     document.getElementById('btnClear').addEventListener('click', clearForm);
 
-    document.getElementById('modeFormBtn').addEventListener('click', () => setEditorMode('form'));
-    document.getElementById('modeRawBtn').addEventListener('click', () => setEditorMode('raw'));
     document.getElementById('jsonEditor').addEventListener('input', onEditorInput);
   }
 
-  function escapeHTML(str){ return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function escapeHTML(str){
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 
   document.addEventListener('DOMContentLoaded', init);
 })();
